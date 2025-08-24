@@ -1,6 +1,7 @@
 // netlify/functions/create-payment.js
 
-const mollieClient = require('@mollie/api-client');
+// Importeer de Mollie client op de correcte manier
+const { createMollieClient } = require('@mollie/api-client');
 const { createClient } = require('@supabase/supabase-js');
 
 exports.handler = async (event, context) => {
@@ -34,11 +35,11 @@ exports.handler = async (event, context) => {
             return { statusCode: 404, body: 'Gift not found.' };
         }
 
-        // Initialiseer Mollie client
-        const mollie = mollieClient({ apiKey: process.env.MOLLIE_API_KEY });
+        // Initialiseer de Mollie client met de correcte aanroep
+        const mollieClient = createMollieClient({ apiKey: process.env.MOLLIE_API_KEY });
         
         // Creëer de betaling bij Mollie
-        const payment = await mollie.payments.create({
+        const payment = await mollieClient.payments.create({
             amount: { value: parseFloat(amount).toFixed(2), currency: 'EUR' },
             description: `Bijdrage aan: ${giftData.title}`,
             redirectUrl: `${process.env.SITE_URL}?payment=success`,
