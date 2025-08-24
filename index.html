@@ -43,10 +43,35 @@
     </footer>
 
     <!-- Loading modal -->
-    <div id="loadingModal" class="modal">
+    <div id="paymentModal" class="modal">
         <div class="modal-content">
-            <div class="loading-spinner"></div>
-            <p>Betaling voorbereiden...</p>
+            <span class="close-btn">&times;</span>
+            <div class="modal-header">
+                <img id="modal-image" src="" alt="Cadeau afbeelding" class="modal-image">
+                <h2 id="modal-title"></h2>
+            </div>
+            
+            <form id="paymentForm">
+                <input type="hidden" id="giftIdInput">
+
+                <div class="form-group">
+                    <label for="amountInput">Bijdragebedrag (€)</label>
+                    <input type="number" id="amountInput" step="0.01" min="1.00" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nameInput">Jouw naam</label>
+                    <input type="text" id="nameInput" placeholder="Anoniem" autocomplete="name">
+                    <small>Enkel je naam wordt gepubliceerd op de geboortelijst.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailInput">Jouw e-mailadres (optioneel)</label>
+                    <input type="email" id="emailInput" autocomplete="email">
+                </div>
+                
+                <button type="submit" class="contribute-btn">Verder naar betalen</button>
+            </form>
         </div>
     </div>
     <script type="module" src="script.js"></script>

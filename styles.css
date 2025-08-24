@@ -311,3 +311,58 @@ footer {
 .submit-btn:hover {
     background-color: #0056b3;
 }
+
+/* Stijlen voor de nieuwe modal */
+.modal-content .modal-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.modal-content .modal-header .modal-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.modal-content .modal-header h2 {
+    font-size: 1.5em;
+    margin: 0;
+}
+
+.modal-content form {
+    text-align: left;
+}
+
+.modal-content .form-group {
+    margin-bottom: 20px;
+}
+
+.modal-content .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.modal-content .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+.modal-content .form-group small {
+    font-size: 0.8em;
+    color: #888;
+    margin-top: 5px;
+    display: block;
+}
+
+.modal-content button.contribute-btn {
+    width: 100%;
+    margin-top: 15px;
+}

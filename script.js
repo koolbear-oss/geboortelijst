@@ -37,56 +37,93 @@ function renderGifts(gifts) {
         return;
     }
 
+    // Sla de gifts array globaal op zodat we deze later kunnen benaderen
+    window.gifts = gifts;
+
     gifts.forEach(gift => {
         const giftCard = document.createElement('div');
         giftCard.className = 'gift-card';
+        giftCard.dataset.id = gift.id; // Voeg de gift ID toe als data-attribuut
         giftCard.innerHTML = `
-            <img src="${gift.image_url}" alt="${gift.title}" onerror="this.src='/images/placeholder.jpg'">
-            <h3>${gift.title}</h3>
-            <p>${gift.description}</p>
-            <div class="progress-bar-container">
-                <div class="progress-bar" style="width: ${((gift.current_amount / gift.target_amount) * 100).toFixed(0)}%;"></div>
+            <img src="${gift.image_url}" alt="${gift.title}" onerror="this.src='https://via.placeholder.com/250'">
+            <div class="gift-card-content">
+                <h3>${gift.title}</h3>
+                <p>${gift.description}</p>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: ${((gift.current_amount / gift.target_amount) * 100).toFixed(0)}%;"></div>
+                </div>
+                <p class="amount-text">${(gift.current_amount).toFixed(2)}€ / ${gift.target_amount.toFixed(2)}€</p>
+                <button class="contribute-btn">Bijdragen</button>
             </div>
-            <p class="amount-text">${(gift.current_amount).toFixed(2)}€ / ${gift.target_amount.toFixed(2)}€</p>
-            <button class="contribute-btn" onclick="openPaymentModal('${gift.id}', '${gift.title}', ${gift.target_amount - gift.current_amount})">Bijdragen</button>
         `;
         giftGrid.appendChild(giftCard);
     });
 }
 
+// ===== INTERACTIEVE FUNCTIES EN MODALS =====
+const paymentModal = document.getElementById('paymentModal');
+const closeBtn = paymentModal.querySelector('.close-btn');
+const paymentForm = document.getElementById('paymentForm');
 
-// ===== MODAL LOGICA =====
-function showModal() {
-    document.getElementById('loadingModal').style.display = 'flex';
+// Open de modal en vul deze met de cadeau-details
+function openPaymentModal(gift) {
+    document.getElementById('modal-image').src = gift.image_url;
+    document.getElementById('modal-title').textContent = gift.title;
+    document.getElementById('giftIdInput').value = gift.id;
+
+    // Reset het formulier
+    paymentForm.reset();
+    
+    // Toon de modal
+    paymentModal.style.display = 'flex';
 }
 
-function hideModal() {
-    document.getElementById('loadingModal').style.display = 'none';
+// Sluit de modal
+function closePaymentModal() {
+    paymentModal.style.display = 'none';
 }
 
-function openPaymentModal(giftId, giftTitle, remainingAmount) {
-    const amount = prompt(`Hoeveel wil je bijdragen aan de "${giftTitle}"?\nResterend bedrag: ${remainingAmount.toFixed(2)}€`);
-    if (amount) {
-        // Vraag om naam en email voor de Mollie-metadata
-        const name = prompt("Wat is je naam? (optioneel)");
-        const email = prompt("Wat is je e-mailadres? (optioneel)");
-
-        // Voorkom 'null' bij annuleren
-        const finalName = name === null ? "" : name;
-        const finalEmail = email === null ? "" : email;
-
-        initiatePayment(giftId, amount, finalName, finalEmail);
+// Verwerk de klik op de 'Bijdragen' knop
+function handleContributeClick(e) {
+    if (e.target.classList.contains('contribute-btn')) {
+        const giftCard = e.target.closest('.gift-card');
+        const giftId = giftCard.dataset.id;
+        
+        // Zoek het cadeau in de gifts array (deze is globaal gezet in renderGifts)
+        const gift = gifts.find(g => g.id === giftId);
+        if (gift) {
+            openPaymentModal(gift);
+        }
     }
 }
 
+// Verwerk het versturen van het betalingsformulier
+async function handlePaymentFormSubmit(e) {
+    e.preventDefault();
+    
+    const giftId = document.getElementById('giftIdInput').value;
+    const amount = amountInput.value;
+    const name = document.getElementById('nameInput').value;
+    const email = document.getElementById('emailInput').value;
+    
+    // Verberg de modal terwijl de betaling wordt voorbereid
+    closePaymentModal();
+    
+    // Roep de betaalfunctie aan
+    initiatePayment(giftId, amount, name, email);
+}
 
 // ===== BETAALFUNCTIES =====
 async function initiatePayment(giftId, amount, name, email) {
-    showModal();
     try {
         const response = await fetch(`${window.location.origin}/.netlify/functions/create-payment`, {
             method: 'POST',
-            body: JSON.stringify({ id: giftId, amount: parseFloat(amount).toFixed(2), name: name, email: email }),
+            body: JSON.stringify({
+                id: giftId,
+                amount: parseFloat(amount).toFixed(2),
+                name: name || 'Anoniem',
+                email: email || ''
+            }),
             headers: { 'Content-Type': 'application/json' }
         });
 
@@ -95,7 +132,6 @@ async function initiatePayment(giftId, amount, name, email) {
         if (!response.ok) {
             console.error('API Error:', data);
             alert('Er is een fout opgetreden: ' + (data.error || 'Onbekende fout'));
-            hideModal();
             return;
         }
 
@@ -103,15 +139,30 @@ async function initiatePayment(giftId, amount, name, email) {
     } catch (error) {
         console.error('Fetch Error:', error);
         alert('Er is een verbindingsfout opgetreden.');
-        hideModal();
     }
 }
 
-
 // ===== INITIALISATIE =====
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🍼 Geboortelijst applicatie gestart');
+document.addEventListener('DOMContentLoaded', () => {
     fetchGifts();
+    
+    // Voeg event listener toe aan de gift grid om clicks te delegeren
+    const giftGrid = document.getElementById('giftGrid');
+    if (giftGrid) {
+        giftGrid.addEventListener('click', handleContributeClick);
+    }
+    
+    // Voeg event listeners toe aan de modal
+    const amountInput = document.getElementById('amountInput');
+    closeBtn.addEventListener('click', closePaymentModal);
+    window.addEventListener('click', (e) => {
+        if (e.target === paymentModal) {
+            closePaymentModal();
+        }
+    });
+
+    // Voeg event listener toe aan het formulier
+    paymentForm.addEventListener('submit', handlePaymentFormSubmit);
 });
 
 // Exporteer functies naar de globale scope voor onclick events
