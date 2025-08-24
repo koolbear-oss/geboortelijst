@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geboortelijst Beheer</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-form {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .admin-form h2 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            resize: vertical;
+            height: 100px;
+        }
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #FF5722;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .submit-btn:hover {
+            background-color: #E64A19;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🍼 Geboortelijst Beheer</h1>
+            <p class="subtitle">Voeg nieuwe cadeaus toe aan de lijst</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="admin-form">
+            <h2>Nieuw cadeau toevoegen</h2>
+            <form id="addGiftForm">
+                <div class="form-group">
+                    <label for="title">Titel</label>
+                    <input type="text" id="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Beschrijving</label>
+                    <textarea id="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="price">Prijs (€)</label>
+                    <input type="number" id="price" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="image_url">Afbeelding URL</label>
+                    <input type="url" id="image_url" required>
+                </div>
+                <button type="submit" class="submit-btn">Cadeau toevoegen</button>
+            </form>
+            <p id="message"></p>
+        </div>
+    </main>
+    
+    <script src="admin.js" type="module"></script>
+</body>
+</html>
