@@ -3,38 +3,38 @@
 const gifts = [
     {
         id: 'kinderwagen',
-        title: 'Kinderwagen Premium',
-        description: 'Een luxe kinderwagen met alle comfort voor onze kleine. Inclusief regenhoes en verschoontas.',
-        price: 450.00,
-        image: 'images/kinderwagen.jpg',
-        currentAmount: 125.00, // Dit zou later dynamisch worden opgehaald
+        title: 'Kinderwagen 3-in-1 Isofix',
+        description: 'Een luxe kinderwagen met alle comfort. Inclusief regenhoes en verschoontas.',
+        price: 400.00,
+        image: 'images/kinderwagen.jpg', // Aangepast naar jouw bestandsnaam
+        currentAmount: 125.00,
         targetAmount: 450.00
     },
     {
-        id: 'autostoel',
-        title: 'Autostoel 0-18 maanden',
-        description: 'Veilige autostoel die meegroeit van baby tot peuter. Gecertificeerd volgens laatste veiligheidsnormen.',
-        price: 280.00,
-        image: 'images/autostoel.jpg',
-        currentAmount: 280.00, // Volledig betaald - voor demo
-        targetAmount: 280.00
+        id: 'verschoningskussen',
+        title: 'Verschoningskussen',
+        description: 'Verschonen op alle mogelijke plaatsen denkbaar',
+        price: 25.00,
+        image: 'images/verschoningskussen.jpg', // Aangepast naar jouw bestandsnaam
+        currentAmount: 25.00,
+        targetAmount: 25.00
     },
     {
-        id: 'ledikant',
-        title: 'Baby Ledikant',
-        description: 'Stijlvol houten ledikant dat later omgebouwd kan worden tot peuterbed. Inclusief matras.',
-        price: 320.00,
-        image: 'images/ledikant.jpg',
-        currentAmount: 0.00, // Nog niets betaald
-        targetAmount: 320.00
+        id: 'flessenwarmer',
+        title: 'Flessenwarmer',
+        description: 'Gemakkelijk opwarmen van flesjes midden in de nacht',
+        price: 90.00,
+        image: 'images/flessenwarmer.jpg', // Aangepast naar jouw bestandsnaam
+        currentAmount: 0.00,
+        targetAmount: 90.00
     },
     {
-        id: 'babyfoon',
-        title: 'Video Babyfoon',
+        id: 'cosleeper',
+        title: 'Bijzet bedje',
         description: 'Moderne babyfoon met video, app-bediening en nachtzicht. Voor extra gemoedsrust.',
         price: 150.00,
-        image: 'images/babyfoon.jpg',
-        currentAmount: 87.50, // Gedeeltelijk betaald
+        image: 'images/cosleeper.jpg', // Aangepast naar jouw bestandsnaam
+        currentAmount: 87.50,
         targetAmount: 150.00
     }
 ];
@@ -73,7 +73,7 @@ function renderGifts() {
                             <div class="progress-fill" style="width: ${percentage}%"></div>
                         </div>
                         <div style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem; color: #4a5568;">
-                            ${isCompleted ? '🎉 Volledig gefinancierd!' : `Nog €${remaining.toFixed(2)} nodig`}
+                            ${isCompleted ? '🎉 Volledig gefinancieerd!' : `Nog €${remaining.toFixed(2)} nodig`}
                         </div>
                     </div>
                     
@@ -99,7 +99,7 @@ async function initiatePayment(giftId) {
     
     // Vraag gebruiker om bijdrage bedrag
     const remaining = gift.targetAmount - gift.currentAmount;
-    const suggestedAmount = Math.min(50, remaining); // Stel €50 voor, of het restbedrag
+    const suggestedAmount = Math.min(50, remaining);
     
     let amount = prompt(
         `Hoeveel wil je bijdragen aan "${gift.title}"?\n\n` +
@@ -120,6 +120,8 @@ async function initiatePayment(giftId) {
     showLoadingModal(true);
     
     try {
+        console.log('🔄 Roep backend API aan:', `${API_BASE}/create-payment`);
+        
         // Roep onze veilige backend functie aan
         const response = await fetch(`${API_BASE}/create-payment`, {
             method: 'POST',
@@ -132,25 +134,65 @@ async function initiatePayment(giftId) {
             })
         });
         
+        console.log('📡 Response status:', response.status);
+        
         const result = await response.json();
+        console.log('📦 Response data:', result);
         
         if (!response.ok) {
             throw new Error(result.error || 'Onbekende fout bij het aanmaken van de betaling');
         }
         
         if (result.checkoutUrl) {
-            // Redirect naar echte Mollie checkout
             console.log('✅ Betaling aangemaakt:', result.paymentId);
             console.log('💰 Bedrag:', result.amount);
+            console.log('🔗 Checkout URL:', result.checkoutUrl);
             window.location.href = result.checkoutUrl;
         } else {
             throw new Error('Geen checkout URL ontvangen');
         }
         
     } catch (error) {
-        console.error('Betaling fout:', error);
+        console.error('❌ Betaling fout:', error);
         alert(`Er ging iets mis: ${error.message}`);
         showLoadingModal(false);
+    }
+}
+
+// ===== UTILITY FUNCTIES =====
+// Toon/verberg loading modal
+function showLoadingModal(show) {
+    const modal = document.getElementById('loadingModal');
+    modal.style.display = show ? 'block' : 'none';
+}
+
+// Check voor betaling success in URL parameters
+function checkPaymentSuccess() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const giftId = urlParams.get('gift');
+    const amount = urlParams.get('amount');
+    
+    if (success === 'true' && giftId && amount) {
+        // In een echte app zou je dit via webhook/backend verifiëren
+        // Voor demo purposes simuleren we een succesvolle betaling
+        const gift = gifts.find(g => g.id === giftId);
+        if (gift) {
+            // Update het bedrag (in een echte app komt dit uit de database)
+            gift.currentAmount += parseFloat(amount);
+            if (gift.currentAmount > gift.targetAmount) {
+                gift.currentAmount = gift.targetAmount;
+            }
+            
+            // Render de cadeaus opnieuw met nieuwe percentages
+            renderGifts();
+            
+            // Toon success bericht
+            alert(`🎉 Bedankt voor je bijdrage van €${parseFloat(amount).toFixed(2)} aan "${gift.title}"!`);
+            
+            // Verwijder parameters uit URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
     }
 }
 
