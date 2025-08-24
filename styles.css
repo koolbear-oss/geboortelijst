@@ -1,8 +1,8 @@
 /* Globale stijlen en lettertypen */
 body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #F8F7F4; /* Zachte, warme achtergrondkleur */
-    color: #333333; /* Diepe, donkergrijze tekstkleur */
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #F4F4F4; /* Lichte, neutrale achtergrond */
+    color: #333333; /* Donkergrijze tekst voor optimale leesbaarheid */
     margin: 0;
     padding: 0;
     line-height: 1.6;
@@ -21,22 +21,20 @@ header {
     text-align: center;
     padding: 60px 20px;
     background-color: #ffffff;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
 }
 
 header h1 {
-    font-family: 'Playfair Display', serif; /* Elegant, klassiek font voor de titel */
-    color: #4A4A4A;
-    font-size: 3em;
+    font-size: 2.8em;
+    color: #333333;
     margin-bottom: 10px;
 }
 
 header p.subtitle {
-    font-size: 1.2em;
+    font-size: 1.1em;
     color: #666666;
     max-width: 600px;
     margin: 0 auto;
-    font-weight: 300;
 }
 
 .intro {
@@ -45,7 +43,7 @@ header p.subtitle {
     color: #666;
     font-size: 1.1em;
     font-style: italic;
-    border-bottom: 1px solid #ECEBE6;
+    border-bottom: 1px solid #e0e0e0;
     margin-bottom: 30px;
 }
 
@@ -60,8 +58,8 @@ header p.subtitle {
 /* Afzonderlijke cadeaukaarten */
 .gift-card {
     background-color: #ffffff;
-    border-radius: 12px; /* Afgeronde hoeken */
-    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    border-radius: 8px; /* Subtiele afronding */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -71,29 +69,28 @@ header p.subtitle {
 
 .gift-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
 .gift-card img {
     width: 100%;
-    height: 250px; /* Geef de afbeelding een vaste, grotere hoogte */
+    height: 250px;
     object-fit: cover;
     object-position: center;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
 
 .gift-card-content {
-    padding: 25px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
 
 .gift-card h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.5em;
-    color: #4A4A4A;
+    font-size: 1.4em;
+    color: #333333;
     margin: 0 0 10px;
 }
 
@@ -108,7 +105,7 @@ header p.subtitle {
 /* Voortgangsbalk */
 .progress-container {
     width: 90%;
-    background-color: #ECEBE6;
+    background-color: #e0e0e0;
     border-radius: 50px;
     overflow: hidden;
     margin: 15px auto;
@@ -116,35 +113,34 @@ header p.subtitle {
 }
 
 .progress-bar {
-    background-color: #A9B4A0; /* Zachte, gedempte groen */
+    background-color: #007BFF; /* Helderblauw voor de voortgang */
     height: 100%;
     transition: width 0.5s ease-in-out;
 }
 
 .amount-text {
     font-weight: bold;
-    color: #A9B4A0;
+    color: #007BFF;
     margin-bottom: 15px;
 }
 
 /* Knoppen en interactie */
 .contribute-btn {
-    background-color: #B8860B; /* Elegant brons/goud */
+    background-color: #007BFF; /* Helderblauwe knop */
     color: white;
     border: none;
-    padding: 15px 30px;
+    padding: 12px 25px;
     margin: 0 15px 15px;
     border-radius: 50px;
     cursor: pointer;
     font-size: 1em;
     font-weight: 500;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    letter-spacing: 0.5px;
     transition: background-color 0.3s ease;
 }
 
 .contribute-btn:hover {
-    background-color: #9C7400;
+    background-color: #0056b3;
 }
 
 /* Modale vensters voor betaling */
@@ -156,7 +152,7 @@ header p.subtitle {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.7);
+    background-color: rgba(0,0,0,0.6);
     justify-content: center;
     align-items: center;
 }
@@ -164,15 +160,15 @@ header p.subtitle {
 .modal-content {
     background-color: #ffffff;
     padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
     width: 90%;
     max-width: 500px;
     text-align: center;
 }
 
 .close-btn {
-    color: #333;
+    color: #aaa;
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -187,7 +183,7 @@ header p.subtitle {
 }
 
 .modal-content h2 {
-    color: #4A4A4A;
+    color: #333;
     margin-top: 0;
     font-size: 1.8em;
 }
@@ -205,7 +201,7 @@ header p.subtitle {
 }
 
 .modal-content button {
-    background-color: #B8860B;
+    background-color: #007BFF;
     color: white;
     border: none;
     padding: 15px;
@@ -216,12 +212,12 @@ header p.subtitle {
 }
 
 .modal-content button:hover {
-    background-color: #9C7400;
+    background-color: #0056b3;
 }
 
 /* Aanvullende stijlen voor de info-box */
 .info-box {
-    background-color: #F8F7F4;
+    background-color: #ffffff;
     padding: 30px;
     border-radius: 12px;
     border: 1px solid #ECEBE6;
@@ -231,7 +227,7 @@ header p.subtitle {
 }
 
 .info-box h3 {
-    color: #4A4A4A;
+    color: #333333;
     font-size: 1.4em;
     margin-top: 0;
 }
