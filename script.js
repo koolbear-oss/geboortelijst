@@ -67,7 +67,15 @@ function hideModal() {
 function openPaymentModal(giftId, giftTitle, remainingAmount) {
     const amount = prompt(`Hoeveel wil je bijdragen aan de "${giftTitle}"?\nResterend bedrag: ${remainingAmount.toFixed(2)}€`);
     if (amount) {
-        initiatePayment(giftId, amount);
+        // Vraag om naam en email voor de Mollie-metadata
+        const name = prompt("Wat is je naam? (optioneel)");
+        const email = prompt("Wat is je e-mailadres? (optioneel)");
+
+        // Voorkom 'null' bij annuleren
+        const finalName = name === null ? "" : name;
+        const finalEmail = email === null ? "" : email;
+
+        initiatePayment(giftId, amount, finalName, finalEmail);
     }
 }
 
