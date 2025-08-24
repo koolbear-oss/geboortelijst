@@ -1,79 +1,110 @@
-// Netlify Function: Payment Webhook
-// Deze functie ontvangt updates van Mollie over betaalstatussen
+// ===== SUPABASE API CONFIGURATIE =====
+// Maak verbinding met Supabase om de cadeau-data op te halen
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-exports.handler = async (event, context) => {
-    // Alleen POST requests van Mollie toestaan
-    if (event.httpMethod !== 'POST') {
-        return {
-            statusCode: 405,
-            body: 'Method not allowed'
-        };
+const SUPABASE_URL = 'https://supabase.com/dashboard/project/wixtfldcnmfmpqvwyotv/settings/api-keys'; // Vervang met jouw Supabase URL
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpeHRmbGRjbm1mbXBxdnd5b3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNDA2NjQsImV4cCI6MjA3MTYxNjY2NH0.x34CuRhuR5j6-iRNne6LIWegZiCLxJXODm6WhlRplAI'; // Vervang met jouw anon key
+
+// Initialiseer de Supabase client
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
+// ===== PAGINA-INITIALISATIE EN DATA OPHALEN =====
+async function fetchGifts() {
+    console.log('Fetching gifts from Supabase...');
+    // Haal alle data op uit de 'gifts' tabel
+    const { data: gifts, error } = await supabase
+        .from('gifts')
+        .select('*');
+
+    if (error) {
+        console.error('Error fetching gifts:', error);
+        return;
     }
 
+    console.log('Gifts fetched:', gifts);
+    renderGifts(gifts);
+}
+
+
+// ===== PAGINA RENDERING =====
+function renderGifts(gifts) {
+    const giftGrid = document.getElementById('giftGrid');
+    giftGrid.innerHTML = ''; // Maak het rooster leeg voor we de kaarten renderen
+
+    if (!gifts || gifts.length === 0) {
+        giftGrid.innerHTML = '<p>Er zijn op dit moment geen cadeaus beschikbaar.</p>';
+        return;
+    }
+
+    gifts.forEach(gift => {
+        const giftCard = document.createElement('div');
+        giftCard.className = 'gift-card';
+        giftCard.innerHTML = `
+            <img src="${gift.image_url}" alt="${gift.title}" onerror="this.src='/images/placeholder.jpg'">
+            <h3>${gift.title}</h3>
+            <p>${gift.description}</p>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${((gift.current_amount / gift.target_amount) * 100).toFixed(0)}%;"></div>
+            </div>
+            <p class="amount-text">${(gift.current_amount).toFixed(2)}€ / ${gift.target_amount.toFixed(2)}€</p>
+            <button class="contribute-btn" onclick="openPaymentModal('${gift.id}', '${gift.title}', ${gift.target_amount - gift.current_amount})">Bijdragen</button>
+        `;
+        giftGrid.appendChild(giftCard);
+    });
+}
+
+
+// ===== MODAL LOGICA =====
+function showModal() {
+    document.getElementById('loadingModal').style.display = 'flex';
+}
+
+function hideModal() {
+    document.getElementById('loadingModal').style.display = 'none';
+}
+
+function openPaymentModal(giftId, giftTitle, remainingAmount) {
+    const amount = prompt(`Hoeveel wil je bijdragen aan de "${giftTitle}"?\nResterend bedrag: ${remainingAmount.toFixed(2)}€`);
+    if (amount) {
+        initiatePayment(giftId, amount);
+    }
+}
+
+
+// ===== BETAALFUNCTIES =====
+async function initiatePayment(giftId, amount) {
+    showModal();
     try {
-        // Parse de webhook data van Mollie
-        const webhookData = JSON.parse(event.body);
-        const paymentId = webhookData.id;
-
-        console.log('Webhook ontvangen voor payment:', paymentId);
-
-        // Haal de betaalstatus op bij Mollie (webhook bevat alleen het ID)
-        const mollieResponse = await fetch(`https://api.mollie.com/v2/payments/${paymentId}`, {
-            headers: {
-                'Authorization': `Bearer ${process.env.MOLLIE_API_KEY}`,
-            }
+        const response = await fetch('/.netlify/functions/create-payment', {
+            method: 'POST',
+            body: JSON.stringify({ id: giftId, amount: parseFloat(amount).toFixed(2), name: 'Anonieme Bijdrager', email: 'anoniem@geboortelijst.be' }),
+            headers: { 'Content-Type': 'application/json' }
         });
 
-        if (!mollieResponse.ok) {
-            console.error('Fout bij ophalen payment van Mollie:', mollieResponse.status);
-            return {
-                statusCode: 500,
-                body: 'Fout bij ophalen payment details'
-            };
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error('API Error:', data);
+            alert('Er is een fout opgetreden: ' + (data.error || 'Onbekende fout'));
+            hideModal();
+            return;
         }
 
-        const payment = await mollieResponse.json();
-        console.log('Payment status:', payment.status);
-        console.log('Payment metadata:', payment.metadata);
-
-        // Verwerk alleen succesvolle betalingen
-        if (payment.status === 'paid') {
-            const giftId = payment.metadata.giftId;
-            const amount = parseFloat(payment.amount.value);
-            
-            console.log(`✅ Betaling succesvol: €${amount} voor gift ${giftId}`);
-            
-            // TODO: Hier zou je normaal de database updaten
-            // Voor nu loggen we alleen - in volgende stap maken we een simpele data store
-            
-            // In een echte applicatie zou je hier:
-            // 1. De gift data in je database updaten
-            // 2. Een email versturen naar de administrators
-            // 3. Mogelijk een dankmail naar de donateur
-            
-            console.log('📧 TODO: Update gift data in database');
-            console.log('📧 TODO: Verstuur notificatie email');
-            
-        } else if (payment.status === 'failed' || payment.status === 'canceled') {
-            console.log(`❌ Betaling mislukt/geannuleerd: ${payment.status}`);
-        } else {
-            console.log(`⏳ Betaling status: ${payment.status}`);
-        }
-
-        // Altijd een 200 status teruggeven aan Mollie (anders proberen ze opnieuw)
-        return {
-            statusCode: 200,
-            body: 'OK'
-        };
-
+        window.location.href = data.checkoutUrl;
     } catch (error) {
-        console.error('Webhook processing error:', error);
-        
-        // Ook bij errors een 200 teruggeven om eindloze retries te voorkomen
-        // Mollie probeert anders steeds opnieuw
-        return {
-            statusCode: 200,
-            body: 'Error processed'
-        };
+        console.error('Fetch Error:', error);
+        alert('Er is een verbindingsfout opgetreden.');
+        hideModal();
     }
-};
+}
+
+
+// ===== INITIALISATIE =====
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🍼 Geboortelijst applicatie gestart');
+    fetchGifts();
+});
+
+// Exporteer functies naar de globale scope voor onclick events
+window.openPaymentModal = openPaymentModal;
