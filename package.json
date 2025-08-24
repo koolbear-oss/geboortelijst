@@ -1,0 +1,14 @@
+{
+  "name": "geboortelijst",
+  "version": "1.0.0",
+  "description": "Een interactieve geboortelijst",
+  "main": "index.html",
+  "scripts": {
+    "start": "netlify dev",
+    "deploy": "netlify deploy --prod"
+  },
+  "dependencies": {
+    "@mollie/api-client": "^3.0.0",
+    "@supabase/supabase-js": "^2.0.0"
+  }
+}
