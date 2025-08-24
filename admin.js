@@ -16,13 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const image_url = document.getElementById('image_url').value;
 
         try {
-            const response = await fetch('/.netlify/functions/add-gift', {
+            const response = await fetch('/.netlify/functions/add-gift', { // <--- Hier is de aanpassing
                 method: 'POST',
                 body: JSON.stringify({
                     title,
                     description,
                     price,
-                    target_amount: price, // Begin met target_amount gelijk aan de prijs
+                    target_amount: price,
                     current_amount: 0.00,
                     image_url
                 }),
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 messageEl.textContent = '✅ Cadeau succesvol toegevoegd!';
                 messageEl.style.color = 'green';
-                form.reset(); // Maak het formulier leeg na succes
+                form.reset();
             } else {
                 messageEl.textContent = '❌ Fout: ' + (result.error || 'Onbekende fout.');
                 messageEl.style.color = 'red';
