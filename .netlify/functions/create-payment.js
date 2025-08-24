@@ -42,12 +42,12 @@ exports.handler = async (event, context) => {
         const payment = await mollieClient.payments.create({
             amount: { value: parseFloat(amount).toFixed(2), currency: 'EUR' },
             description: `Bijdrage aan: ${giftData.title}`,
-            redirectUrl: `${process.env.SITE_URL}?payment=success`,
-            webhookUrl: `${process.env.SITE_URL}/.netlify/functions/payment-webhook`,
+            redirectUrl: 'https://geboortelijst.netlify.app/?payment=success', // Hardcoded voor de zekerheid
+            webhookUrl: 'https://geboortelijst.netlify.app/.netlify/functions/payment-webhook', // Hardcoded voor de zekerheid
             metadata: { 
                 giftId: giftId, 
-                payerName: name || 'Anoniem', // Gebruik 'Anoniem' als er geen naam is
-                payerEmail: email || '' // Lege string als er geen e-mail is
+                payerName: name || 'Anoniem',
+                payerEmail: email || ''
             }
         });
 
