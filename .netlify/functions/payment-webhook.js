@@ -1,6 +1,6 @@
 // netlify/functions/payment-webhook.js
 
-const mollieClient = require('@mollie/api-client');
+const { createMollieClient } = require('@mollie/api-client'); // <-- Aangepast
 const { createClient } = require('@supabase/supabase-js');
 
 exports.handler = async (event, context) => {
@@ -21,7 +21,6 @@ exports.handler = async (event, context) => {
             const params = new URLSearchParams(event.body);
             paymentId = params.get('id');
         } else {
-            // Valideer voor Mollie webhooks die mogelijk JSON-data sturen
             const body = JSON.parse(event.body);
             paymentId = body.id;
         }
@@ -30,7 +29,7 @@ exports.handler = async (event, context) => {
             return { statusCode: 400, body: 'Missing payment ID.' };
         }
 
-        const mollie = mollieClient({ apiKey: process.env.MOLLIE_API_KEY });
+        const mollie = createMollieClient({ apiKey: process.env.MOLLIE_API_KEY }); // <-- Aangepast
         const molliePayment = await mollie.payments.get(paymentId);
         
         if (molliePayment.isPaid()) {
