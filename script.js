@@ -73,12 +73,12 @@ function openPaymentModal(giftId, giftTitle, remainingAmount) {
 
 
 // ===== BETAALFUNCTIES =====
-async function initiatePayment(giftId, amount) {
+async function initiatePayment(giftId, amount, name, email) {
     showModal();
     try {
-        const response = await fetch('/.netlify/functions/create-payment', {
+        const response = await fetch(`${window.location.origin}/.netlify/functions/create-payment`, {
             method: 'POST',
-            body: JSON.stringify({ id: giftId, amount: parseFloat(amount).toFixed(2), name: 'Anonieme Bijdrager', email: 'anoniem@geboortelijst.be' }),
+            body: JSON.stringify({ id: giftId, amount: parseFloat(amount).toFixed(2), name: name, email: email }),
             headers: { 'Content-Type': 'application/json' }
         });
 

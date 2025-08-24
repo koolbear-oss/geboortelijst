@@ -20,7 +20,7 @@ exports.handler = async (event, context) => {
 
         // Controleer of de betaling betaald is
         if (molliePayment.isPaid()) {
-            const { giftId } = molliePayment.metadata;
+            const { giftId, payerEmail } = molliePayment.metadata;
             const paidAmount = parseFloat(molliePayment.amount.value);
 
             // Haal de huidige gift op om het bedrag te bepalen
@@ -56,7 +56,8 @@ exports.handler = async (event, context) => {
                     gift_id: giftId,
                     mollie_payment_id: paymentId,
                     amount: paidAmount,
-                    status: 'paid'
+                    status: 'paid',
+                    payer_email: payerEmail
                 }]);
 
             return { statusCode: 200, body: 'OK' };
