@@ -59,8 +59,14 @@ function renderGifts(gifts) {
         const giftCard = document.createElement('div');
         giftCard.className = 'gift-card';
         giftCard.dataset.id = gift.id;
+
+        // Gebruik een betrouwbare placeholder URL als de afbeelding ontbreekt
+        const imageUrl = gift.image_url && gift.image_url.trim() !== ''
+            ? gift.image_url
+            : 'https://placehold.co/250x250/E0E0E0/333333?text=Geen+Afbeelding';
+        
         giftCard.innerHTML = `
-            <img src="${gift.image_url}" alt="${gift.title}" onerror="this.src='https://via.placeholder.com/250'">
+            <img src="${imageUrl}" alt="${gift.title}">
             <div class="gift-card-content">
                 <h3>${gift.title}</h3>
                 <p>${gift.description}</p>
