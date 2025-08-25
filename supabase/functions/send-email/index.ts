@@ -1,24 +1,30 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-// Haal de API-sleutel op uit de omgeving. Deze is veilig en niet zichtbaar in je code.
 const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
 
-// De 'serve' functie wacht op HTTP-verzoeken.
 serve(async (req) => {
+    // Stel de CORS-headers in om verzoeken van je website toe te staan.
+    const headers = {
+        'Access-Control-Allow-Origin': 'https://geboortelijst.netlify.app',
+        'Content-Type': 'application/json'
+    };
+
+    if (req.method === 'OPTIONS') {
+        // Handle CORS preflight requests
+        return new Response("ok", { headers });
+    }
+
     if (req.method !== "POST") {
-        return new Response("Method not allowed", { status: 405 });
+        return new Response("Method not allowed", { status: 405, headers });
     }
 
     try {
-        // Lees de JSON-body van het verzoek.
         const { title, amount, email } = await req.json();
 
-        // Controleer of de benodigde velden aanwezig zijn.
         if (!email || !title || !amount) {
-            return new Response("Missing required fields (email, title, amount)", { status: 400 });
+            return new Response("Missing required fields", { status: 400, headers });
         }
 
-        // Verstuur de e-mail met de SendGrid API.
         const sendgridResponse = await fetch("https://api.sendgrid.com/v3/mail/send", {
             method: "POST",
             headers: {
@@ -27,7 +33,7 @@ serve(async (req) => {
             },
             body: JSON.stringify({
                 personalizations: [{ to: [{ email }] }],
-                from: { email: "colla.hatt@gmail.com", name: "Birth List Colla-Hatt" }, // Vervang met je geverifieerde adres
+                from: { email: "colla.hatt@gmail.com", name: "Birth List Colla-Hatt" },
                 subject: "Bedankt voor je bijdrage!",
                 content: [
                     {
@@ -46,15 +52,14 @@ serve(async (req) => {
             }),
         });
 
-        // Controleer of de API-oproep succesvol was.
         if (!sendgridResponse.ok) {
             console.error("Failed to send email:", await sendgridResponse.text());
-            return new Response("Failed to send email", { status: 500 });
+            return new Response("Failed to send email", { status: 500, headers });
         }
 
-        return new Response("Email sent successfully", { status: 200 });
+        return new Response("Email sent successfully", { status: 200, headers });
     } catch (error) {
         console.error("Error processing request:", error);
-        return new Response("There was an error processing the request.", { status: 500 });
+        return new Response("There was an error processing the request.", { status: 500, headers });
     }
 });
