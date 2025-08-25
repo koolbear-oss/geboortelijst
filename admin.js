@@ -9,31 +9,37 @@ const BUCKET_NAME = 'gift-images'; // De naam van de Supabase Storage bucket
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ===== REFERENTIES NAAR HTML-ELEMENTEN =====
-const adminGiftGrid = document.getElementById('adminGiftGrid');
-const addGiftBtn = document.getElementById('addGiftBtn');
-const editGiftModal = document.getElementById('editGiftModal');
-const closeBtn = editGiftModal.querySelector('.close-btn');
-const modalTitle = document.getElementById('modalTitle');
-const editGiftForm = document.getElementById('editGiftForm');
-const giftIdInput = document.getElementById('giftId');
-const titleInput = document.getElementById('title');
-const descriptionInput = document.getElementById('description');
-const priceInput = document.getElementById('price');
-const imageInput = document.getElementById('image_url');
-const imageFileInput = document.getElementById('image_file'); // Nieuw input veld
-const submitBtn = editGiftForm.querySelector('.submit-btn');
-const messageEl = document.getElementById('message');
+let adminGiftGrid;
+let addGiftBtn;
+let editGiftModal;
+let closeBtn;
+let modalTitle;
+let editGiftForm;
+let giftIdInput;
+let titleInput;
+let descriptionInput;
+let priceInput;
+let imageInput;
+let imageFileInput;
+let submitBtn;
+let messageEl;
 
 // ===== FUNCTIES VOOR DATA OPHALEN EN WEERGEVEN =====
 async function fetchAndRenderGifts() {
-    messageEl.textContent = '';
-    adminGiftGrid.innerHTML = '<p class="loading-message">Laden van cadeaus...</p>';
+    if (messageEl) {
+        messageEl.textContent = '';
+    }
+    if (adminGiftGrid) {
+        adminGiftGrid.innerHTML = '<p class="loading-message">Laden van cadeaus...</p>';
+    }
     
     const { data: gifts, error } = await supabase.from('gifts').select('*');
 
     if (error) {
         console.error('Fout bij het ophalen van cadeaus:', error);
-        adminGiftGrid.innerHTML = `<p class="error-message">Fout bij het laden van cadeaus: ${error.message}</p>`;
+        if (adminGiftGrid) {
+            adminGiftGrid.innerHTML = `<p class="error-message">Fout bij het laden van cadeaus: ${error.message}</p>`;
+        }
         return;
     }
 
@@ -41,6 +47,8 @@ async function fetchAndRenderGifts() {
 }
 
 function renderGifts(gifts) {
+    if (!adminGiftGrid) return;
+
     adminGiftGrid.innerHTML = '';
     if (!gifts || gifts.length === 0) {
         adminGiftGrid.innerHTML = '<p class="loading-message">Er zijn nog geen cadeaus toegevoegd.</p>';
@@ -69,11 +77,14 @@ function renderGifts(gifts) {
 
 // ===== MODAL FUNCTIES =====
 function openModal(gift = null) {
-    messageEl.textContent = '';
-    editGiftForm.reset();
+    if (messageEl) {
+        messageEl.textContent = '';
+    }
+    if (editGiftForm) {
+        editGiftForm.reset();
+    }
     
     if (gift) {
-        // Modus: Bewerken
         modalTitle.textContent = 'Cadeau bewerken';
         submitBtn.textContent = 'Wijzigingen opslaan';
         giftIdInput.value = gift.id;
@@ -82,132 +93,167 @@ function openModal(gift = null) {
         priceInput.value = gift.target_amount;
         imageInput.value = gift.image_url;
     } else {
-        // Modus: Toevoegen
         modalTitle.textContent = 'Nieuw cadeau toevoegen';
         submitBtn.textContent = 'Cadeau toevoegen';
         giftIdInput.value = '';
     }
-    editGiftModal.style.display = 'flex';
+    if (editGiftModal) {
+        editGiftModal.style.display = 'flex';
+    }
 }
 
 function closeModal() {
-    editGiftModal.style.display = 'none';
+    if (editGiftModal) {
+        editGiftModal.style.display = 'none';
+    }
 }
 
-// ===== EVENT LISTENERS =====
+// ===== INITIALISATIE EN EVENT LISTENERS =====
 document.addEventListener('DOMContentLoaded', () => {
+    // Definieer de referenties NA het laden van de pagina
+    adminGiftGrid = document.getElementById('adminGiftGrid');
+    addGiftBtn = document.getElementById('addGiftBtn');
+    editGiftModal = document.getElementById('editGiftModal');
+    closeBtn = editGiftModal ? editGiftModal.querySelector('.close-btn') : null;
+    modalTitle = document.getElementById('modalTitle');
+    editGiftForm = document.getElementById('editGiftForm');
+    giftIdInput = document.getElementById('giftId');
+    titleInput = document.getElementById('title');
+    descriptionInput = document.getElementById('description');
+    priceInput = document.getElementById('price');
+    imageInput = document.getElementById('image_url');
+    imageFileInput = document.getElementById('image_file');
+    submitBtn = editGiftForm ? editGiftForm.querySelector('.submit-btn') : null;
+    messageEl = document.getElementById('message');
+
+    // Haal de cadeaus op en render ze
     fetchAndRenderGifts();
-});
-
-addGiftBtn.addEventListener('click', () => {
-    openModal();
-});
-
-adminGiftGrid.addEventListener('click', async (e) => {
-    // Bewerk-knop
-    if (e.target.classList.contains('edit-btn')) {
-        const giftId = e.target.dataset.id;
-        const { data: gift, error } = await supabase.from('gifts').select('*').eq('id', giftId).single();
-        if (error) {
-            console.error('Fout bij het ophalen van cadeau voor bewerken:', error);
-            messageEl.textContent = '❌ Fout bij het laden van cadeaugegevens.';
-            messageEl.style.color = 'red';
-            return;
-        }
-        openModal(gift);
+    
+    // Voeg event listeners toe
+    if (addGiftBtn) {
+        addGiftBtn.addEventListener('click', () => {
+            openModal();
+        });
     }
-    // Verwijder-knop
-    if (e.target.classList.contains('delete-btn')) {
-        if (confirm('Weet je zeker dat je dit cadeau wilt verwijderen?')) {
-            const giftId = e.target.dataset.id;
-            const { error } = await supabase.from('gifts').delete().eq('id', giftId);
-            if (error) {
-                console.error('Fout bij het verwijderen:', error);
-                alert('❌ Fout bij het verwijderen van het cadeau.');
+
+    if (adminGiftGrid) {
+        adminGiftGrid.addEventListener('click', async (e) => {
+            // Bewerk-knop
+            if (e.target.classList.contains('edit-btn')) {
+                const giftId = e.target.dataset.id;
+                const { data: gift, error } = await supabase.from('gifts').select('*').eq('id', giftId).single();
+                if (error) {
+                    console.error('Fout bij het ophalen van cadeau voor bewerken:', error);
+                    if (messageEl) {
+                        messageEl.textContent = '❌ Fout bij het laden van cadeaugegevens.';
+                        messageEl.style.color = 'red';
+                    }
+                    return;
+                }
+                openModal(gift);
+            }
+            // Verwijder-knop
+            if (e.target.classList.contains('delete-btn')) {
+                if (confirm('Weet je zeker dat je dit cadeau wilt verwijderen?')) {
+                    const giftId = e.target.dataset.id;
+                    const { error } = await supabase.from('gifts').delete().eq('id', giftId);
+                    if (error) {
+                        console.error('Fout bij het verwijderen:', error);
+                        alert('❌ Fout bij het verwijderen van het cadeau.');
+                    } else {
+                        fetchAndRenderGifts(); // Herlaad de lijst
+                    }
+                }
+            }
+        });
+    }
+
+    if (editGiftForm) {
+        editGiftForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+        
+            if (messageEl) {
+                messageEl.textContent = 'Bezig met verwerken...';
+                messageEl.style.color = '#333';
+            }
+        
+            const isEditing = !!giftIdInput.value;
+        
+            let imageUrl = imageInput.value;
+        
+            if (imageFileInput.files.length > 0) {
+                const file = imageFileInput.files[0];
+                const filePath = `gifts/${Date.now()}_${file.name}`;
+        
+                try {
+                    const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file);
+        
+                    if (uploadError) {
+                        throw uploadError;
+                    }
+        
+                    const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+                    imageUrl = publicUrlData.publicUrl;
+        
+                } catch (error) {
+                    console.error('Fout bij het uploaden van de afbeelding:', error);
+                    if (messageEl) {
+                        messageEl.textContent = '❌ Fout bij het uploaden van de afbeelding.';
+                        messageEl.style.color = 'red';
+                    }
+                    return;
+                }
+            } else if (!imageInput.value && !isEditing) {
+                imageUrl = 'https://via.placeholder.com/250';
+            }
+        
+            const giftData = {
+                title: titleInput.value,
+                description: descriptionInput.value,
+                target_amount: parseFloat(priceInput.value),
+                image_url: imageUrl
+            };
+        
+            let result, error;
+        
+            if (isEditing) {
+                ({ data: result, error } = await supabase
+                    .from('gifts')
+                    .update(giftData)
+                    .eq('id', giftIdInput.value));
             } else {
-                fetchAndRenderGifts(); // Herlaad de lijst
+                ({ data: result, error } = await supabase
+                    .from('gifts')
+                    .insert([{
+                        ...giftData,
+                        current_amount: 0.00
+                    }]));
             }
-        }
-    }
-});
-
-editGiftForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    messageEl.textContent = 'Bezig met verwerken...';
-    messageEl.style.color = '#333';
-
-    const isEditing = !!giftIdInput.value;
-
-    // Begin met een standaardafbeelding als er niets is ingevuld
-    let imageUrl = 'https://via.placeholder.com/250';
-
-    // Prioriteit 1: Controleer of er een nieuw bestand is geüpload
-    if (imageFileInput.files.length > 0) {
-        const file = imageFileInput.files[0];
-        const filePath = `gifts/${Date.now()}_${file.name}`;
-
-        try {
-            const { data, error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file);
-
-            if (uploadError) {
-                throw uploadError;
+        
+            if (error) {
+                console.error('Supabase error:', error);
+                if (messageEl) {
+                    messageEl.textContent = '❌ Fout: ' + error.message;
+                    messageEl.style.color = 'red';
+                }
+            } else {
+                if (messageEl) {
+                    messageEl.textContent = `✅ Cadeau succesvol ${isEditing ? 'bijgewerkt' : 'toegevoegd'}!`;
+                    messageEl.style.color = 'green';
+                }
+                editGiftForm.reset();
+                closeModal();
+                fetchAndRenderGifts();
             }
+        });
+    }
 
-            const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
-            imageUrl = publicUrlData.publicUrl;
-
-        } catch (error) {
-            console.error('Fout bij het uploaden van de afbeelding:', error);
-            messageEl.textContent = '❌ Fout bij het uploaden van de afbeelding.';
-            messageEl.style.color = 'red';
-            return;
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
+    window.addEventListener('click', (e) => {
+        if (e.target === editGiftModal) {
+            closeModal();
         }
-    } 
-    // Prioriteit 2: Als er geen bestand is geüpload, gebruik dan de URL in het tekstveld
-    else if (imageInput.value) {
-        imageUrl = imageInput.value;
-    }
-
-    const giftData = {
-        title: titleInput.value,
-        description: descriptionInput.value,
-        target_amount: parseFloat(priceInput.value),
-        image_url: imageUrl
-    };
-
-    let result, error;
-
-    if (isEditing) {
-        ({ data: result, error } = await supabase
-            .from('gifts')
-            .update(giftData)
-            .eq('id', giftIdInput.value));
-    } else {
-        ({ data: result, error } = await supabase
-            .from('gifts')
-            .insert([{
-                ...giftData,
-                current_amount: 0.00
-            }]));
-    }
-
-    if (error) {
-        console.error('Supabase error:', error);
-        messageEl.textContent = '❌ Fout: ' + error.message;
-        messageEl.style.color = 'red';
-    } else {
-        messageEl.textContent = `✅ Cadeau succesvol ${isEditing ? 'bijgewerkt' : 'toegevoegd'}!`;
-        messageEl.style.color = 'green';
-        editGiftForm.reset();
-        closeModal();
-        fetchAndRenderGifts();
-    }
-});
-
-closeBtn.addEventListener('click', closeModal);
-window.addEventListener('click', (e) => {
-    if (e.target === editGiftModal) {
-        closeModal();
-    }
+    });
 });
