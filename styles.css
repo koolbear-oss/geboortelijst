@@ -50,9 +50,15 @@ header p.subtitle {
 /* Sectie voor de cadeaulijst */
 .gift-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 30px;
     padding: 20px 0;
+}
+
+@media (max-width: 768px) {
+    .gift-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Afzonderlijke cadeaukaarten */
@@ -113,9 +119,20 @@ header p.subtitle {
 }
 
 .progress-bar {
-    background-color: #007BFF; /* Helderblauw voor de voortgang */
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    height: 15px;
+    margin: 10px 0;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-fill {
+    background-color: #4CAF50; /* Heldergroen */
     height: 100%;
     transition: width 0.5s ease-in-out;
+    border-radius: 10px;
 }
 
 .amount-text {
@@ -126,21 +143,23 @@ header p.subtitle {
 
 /* Knoppen en interactie */
 .contribute-btn {
-    background-color: #007BFF; /* Helderblauwe knop */
+    background-color: #FF5722;
     color: white;
     border: none;
-    padding: 12px 25px;
+    padding: 15px 30px;
     margin: 0 15px 15px;
     border-radius: 50px;
     cursor: pointer;
-    font-size: 1em;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    transition: background-color 0.3s ease;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .contribute-btn:hover {
-    background-color: #0056b3;
+    background-color: #E64A19;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Modale vensters voor betaling */

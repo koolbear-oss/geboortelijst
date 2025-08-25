@@ -23,6 +23,7 @@ let imageInput;
 let imageFileInput;
 let submitBtn;
 let messageEl;
+let searchInput; // Nieuwe referentie
 
 // ===== FUNCTIES VOOR DATA OPHALEN EN WEERGEVEN =====
 async function fetchAndRenderGifts() {
@@ -96,7 +97,7 @@ function openModal(gift = null) {
         giftIdInput.value = gift.id;
         titleInput.value = gift.title;
         descriptionInput.value = gift.description;
-        priceInput.value = gift.target_amount;
+        priceInput.value = gift.price; // Correctie: de modal gebruikt nu de 'price' kolom
         imageInput.value = gift.image_url;
     } else {
         modalTitle.textContent = 'Nieuw cadeau toevoegen';
@@ -131,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     imageFileInput = document.getElementById('image_file');
     submitBtn = editGiftForm ? editGiftForm.querySelector('.submit-btn') : null;
     messageEl = document.getElementById('message');
+    searchInput = document.getElementById('searchInput'); // Initialiseer de zoekbalk
 
     // Haal de cadeaus op en render ze
     fetchAndRenderGifts();
@@ -177,30 +179,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (editGiftForm) {
         editGiftForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+        
             if (messageEl) {
                 messageEl.textContent = 'Bezig met verwerken...';
                 messageEl.style.color = '#333';
             }
-
+        
             const isEditing = !!giftIdInput.value;
-
+        
             let imageUrl = imageInput.value;
-
+        
             if (imageFileInput.files.length > 0) {
                 const file = imageFileInput.files[0];
                 const filePath = `gifts/${Date.now()}_${file.name}`;
-
+        
                 try {
                     const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file);
-
+        
                     if (uploadError) {
                         throw uploadError;
                     }
-
+        
                     const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
                     imageUrl = publicUrlData.publicUrl;
-
+        
                 } catch (error) {
                     console.error('Fout bij het uploaden van de afbeelding:', error);
                     if (messageEl) {
@@ -212,18 +214,17 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (!imageInput.value && !isEditing) {
                 imageUrl = 'https://placehold.co/250x250/E0E0E0/333333?text=Geen+Afbeelding';
             }
-
+        
             const giftData = {
                 title: titleInput.value,
                 description: descriptionInput.value,
-                // De correctie is hier: vul zowel `price` als `target_amount` in.
                 price: parseFloat(priceInput.value) || 0,
                 target_amount: parseFloat(priceInput.value) || 0,
                 image_url: imageUrl
             };
-
+        
             let result, error;
-
+        
             if (isEditing) {
                 ({ data: result, error } = await supabase
                     .from('gifts')
@@ -237,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         current_amount: 0.00
                     }]));
             }
-
+        
             if (error) {
                 console.error('Supabase error:', error);
                 if (messageEl) {
@@ -264,4 +265,21 @@ document.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }
     });
+
+    // Zoekbalk-functionaliteit
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const giftCards = adminGiftGrid.querySelectorAll('.gift-card');
+            giftCards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                if (title.includes(query) || description.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    }
 });
