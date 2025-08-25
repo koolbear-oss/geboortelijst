@@ -97,7 +97,7 @@ function openModal(gift = null) {
         giftIdInput.value = gift.id;
         titleInput.value = gift.title;
         descriptionInput.value = gift.description;
-        priceInput.value = gift.price; // Correctie: de modal gebruikt nu de 'price' kolom
+        priceInput.value = gift.target_amount;
         imageInput.value = gift.image_url;
     } else {
         modalTitle.textContent = 'Nieuw cadeau toevoegen';
