@@ -117,6 +117,7 @@ header p.subtitle {
     margin: 10px 0;
     overflow: hidden;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative; /* Voeg deze regel toe */
 }
 
 .progress-fill {
