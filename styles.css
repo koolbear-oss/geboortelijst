@@ -461,3 +461,21 @@ footer {
     margin-top: 15px;
     font-weight: bold;
 }
+
+/* Stijl voor de 'Verwijderen'-knop */
+.gift-card .delete-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 50px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+    margin-left: 10px; /* Zorgt voor ruimte tussen Bewerken en Verwijderen */
+}
+
+.gift-card .delete-btn:hover {
+    background-color: #d32f2f;
+}
