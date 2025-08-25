@@ -58,7 +58,7 @@ function renderGifts(gifts) {
                     <span class="progress-percentage">${percentage}%</span>
                 </div>
                 <p class="amount-text">${(gift.current_amount).toFixed(2)}€ / ${gift.target_amount.toFixed(2)}€</p>
-                <button class="contribute-btn ${isFunded ? 'disabled' : ''}" ${isFunded ? 'disabled' : ''}>${isFunded ? 'Bedankt!' : 'Bijdragen'}</button>
+                <button class="contribute-btn ${isFunded ? 'disabled' : ''}" ${isFunded ? 'disabled' : ''}>${isFunded ? 'Thanks!' : 'Contribute'}</button>
             </div>
         `;
         giftGrid.appendChild(giftCard);
@@ -126,7 +126,7 @@ async function initiatePayment(giftId, amount, name, email) {
             body: JSON.stringify({
                 id: giftId,
                 amount: parseFloat(amount).toFixed(2),
-                name: name || 'Anoniem',
+                name: name || 'Anonymous',
                 email: email || ''
             }),
             headers: { 'Content-Type': 'application/json' }
@@ -143,7 +143,7 @@ async function initiatePayment(giftId, amount, name, email) {
         window.location.href = data.checkoutUrl;
     } catch (error) {
         console.error('Fetch Error:', error);
-        alert('Er is een verbindingsfout opgetreden.');
+        alert('There has been a connection error.');
     }
 }
 
