@@ -27,7 +27,7 @@ serve(async (req) => {
             },
             body: JSON.stringify({
                 personalizations: [{ to: [{ email }] }],
-                from: { email: "jouw@email.com", name: "Geboortelijst" }, // Vervang met je geverifieerde adres
+                from: { email: "colla.hatt@gmail.com", name: "Birth List Colla-Hatt" }, // Vervang met je geverifieerde adres
                 subject: "Bedankt voor je bijdrage!",
                 content: [
                     {
