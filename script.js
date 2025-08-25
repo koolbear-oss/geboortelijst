@@ -9,7 +9,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 
-// ===== PAGINA-INITIALISATIE EN DATA OPHALEN =====
+// ===== PAGINA INITIALISATIE EN DATA OPHALEN =====
+let allGifts = [];
+
 async function fetchGifts() {
     console.log('Fetching gifts from Supabase...');
     // Haal alle data op uit de 'gifts' tabel
@@ -21,9 +23,24 @@ async function fetchGifts() {
         console.error('Error fetching gifts:', error);
         return;
     }
+    
+    // Sla de gifts array globaal op zodat we deze later kunnen benaderen
+    allGifts = gifts;
+    renderGifts(allGifts);
+}
 
-    console.log('Gifts fetched:', gifts);
-    renderGifts(gifts);
+// Functie om de terugkeer van de betaling af te handelen
+function handleReturnFromPayment() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('status');
+
+    if (paymentStatus === 'success') {
+        console.log('Payment successful. Updating gift list...');
+        // Verwijder de URL-parameter
+        history.replaceState({}, document.title, window.location.pathname);
+        // Roep de functie aan om de cadeaus opnieuw op te halen
+        fetchGifts();
+    }
 }
 
 // ===== PAGINA RENDERING =====
@@ -35,9 +52,6 @@ function renderGifts(gifts) {
         giftGrid.innerHTML = '<p>Er zijn op dit moment geen cadeaus beschikbaar.</p>';
         return;
     }
-
-    // Sla de gifts array globaal op zodat we deze later kunnen benaderen
-    window.gifts = gifts;
 
     gifts.forEach(gift => {
         const giftCard = document.createElement('div');
@@ -95,7 +109,7 @@ function handleContributeClick(e) {
         const giftId = giftCard.dataset.id;
         
         // Zoek het cadeau in de gifts array (deze is globaal gezet in renderGifts)
-        const gift = gifts.find(g => g.id === giftId);
+        const gift = allGifts.find(g => g.id == giftId);
         if (gift) {
             openPaymentModal(gift);
         }
@@ -149,6 +163,9 @@ async function initiatePayment(giftId, amount, name, email) {
 
 // ===== INITIALISATIE =====
 document.addEventListener('DOMContentLoaded', () => {
+    // Check de URL bij het laden van de pagina voor een succesvolle betaling
+    handleReturnFromPayment();
+    // Laad de cadeaus van Supabase
     fetchGifts();
     
     // Voeg event listener toe aan de gift grid om clicks te delegeren
@@ -169,6 +186,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Voeg event listener toe aan het formulier
     paymentForm.addEventListener('submit', handlePaymentFormSubmit);
 });
-
-// Exporteer functies naar de globale scope voor onclick events
-window.openPaymentModal = openPaymentModal;
