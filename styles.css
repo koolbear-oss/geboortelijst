@@ -79,10 +79,12 @@ header p.subtitle {
 }
 
 .gift-card img {
-    width: 100%;
-    height: 250px;
+    max-width: 80%; /* Verklein de afbeelding */
+    height: auto;
     object-fit: contain;
     object-position: center;
+    display: block;
+    margin: 20px auto; /* Centreer de afbeelding en voeg verticale witruimte toe */
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
 }
