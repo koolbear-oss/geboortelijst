@@ -1,32 +1,32 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geboortelijst Beheer</title>
+    <title>Birth List Management</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>🍼 Geboortelijst Beheer</h1>
-            <p class="subtitle">Beheer, bewerk en voeg cadeaus toe aan de lijst</p>
+            <h1>🍼 Birth List Management</h1>
+            <p class="subtitle">Manage, edit, and add gifts to the list</p>
         </div>
     </header>
 
     <main class="container">
         <section class="add-gift-section">
             <button id="addGiftBtn" class="add-gift-btn">
-                <span class="plus-icon">+</span> Nieuw cadeau toevoegen
+                <span class="plus-icon">+</span> Add New Gift
             </button>
         </section>
 
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Zoeken naar cadeaus...">
+            <input type="text" id="searchInput" placeholder="Search for gifts...">
         </div>
 
         <section class="gift-grid" id="adminGiftGrid">
-            <p class="loading-message">Laden van cadeaus...</p>
+            <p class="loading-message">Loading gifts...</p>
         </section>
     </main>
 
@@ -37,25 +37,25 @@
             <form id="editGiftForm">
                 <input type="hidden" id="giftId">
                 <div class="form-group">
-                    <label for="title">Titel</label>
+                    <label for="title">Title</label>
                     <input type="text" id="title" required>
                 </div>
                 <div class="form-group">
-                    <label for="description">Beschrijving</label>
+                    <label for="description">Description</label>
                     <textarea id="description" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="price">Prijs (€)</label>
+                    <label for="price">Price (€)</label>
                     <input type="number" id="price" step="0.01" required>
                 </div>
                 <div class="form-group">
-                    <label for="image_url">Afbeelding URL (optioneel)</label>
+                    <label for="image_url">Image URL (optional)</label>
                     <input type="url" id="image_url">
                 </div>
                 <div class="form-group">
-                    <label for="image_file">Afbeelding uploaden (optioneel)</label>
+                    <label for="image_file">Upload image (optional)</label>
                     <input type="file" id="image_file" accept="image/*">
-                    <small>Upload een nieuwe afbeelding of gebruik de URL hierboven.</small>
+                    <small>Upload a new image or use the URL above.</small>
                 </div>
                 <button type="submit" class="submit-btn"></button>
             </form>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,18 +19,21 @@
             <p>Every contribution is appreciated 💝</p>
         </section>
 
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search for gifts...">
+        </div>
+
         <section class="gift-grid" id="giftGrid">
-            <!-- Cadeaus worden hier dynamisch geladen via JavaScript -->
-        </section>
+            </section>
 
         <section class="payment-info">
             <div class="info-box">
-                <h3>Hoe werkt het?</h3>
+                <h3>How it works</h3>
                 <ul>
-                    <li>Click 'Contribute" under the gift of your choice</li>
+                    <li>Click 'Contribute' under the gift of your choice</li>
                     <li>Choose the amount you want to contribute</li>
                     <li>Pay safely via Bancontact, Payconiq or creditcard</li>
-                    <li>The progressbar will be updated automatically</li>
+                    <li>The progress bar will be updated automatically</li>
                 </ul>
             </div>
         </section>
@@ -42,12 +45,11 @@
         </div>
     </footer>
 
-    <!-- Loading modal -->
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
             <div class="modal-header">
-                <img id="modal-image" src="" alt="Cadeau afbeelding" class="modal-image">
+                <img id="modal-image" src="" alt="Gift image" class="modal-image">
                 <h2 id="modal-title"></h2>
             </div>
             
@@ -55,13 +57,13 @@
                 <input type="hidden" id="giftIdInput">
 
                 <div class="form-group">
-                    <label for="amountInput">Amount (€)</label>
+                    <label for="amountInput">Contribution amount (€)</label>
                     <input type="number" id="amountInput" step="0.01" min="1.00" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="nameInput">Jouw naam</label>
-                    <input type="text" id="nameInput" placeholder="Anoniem" autocomplete="name">
+                    <label for="nameInput">Your name</label>
+                    <input type="text" id="nameInput" placeholder="Anonymous" autocomplete="name">
                     <small>Only your name will be shared on the website.</small>
                 </div>
 
