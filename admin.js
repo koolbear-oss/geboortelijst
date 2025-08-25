@@ -177,30 +177,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (editGiftForm) {
         editGiftForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-        
+            
             if (messageEl) {
                 messageEl.textContent = 'Bezig met verwerken...';
                 messageEl.style.color = '#333';
             }
-        
+
             const isEditing = !!giftIdInput.value;
-        
+
             let imageUrl = imageInput.value;
-        
+
             if (imageFileInput.files.length > 0) {
                 const file = imageFileInput.files[0];
                 const filePath = `gifts/${Date.now()}_${file.name}`;
-        
+
                 try {
                     const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file);
-        
+
                     if (uploadError) {
                         throw uploadError;
                     }
-        
+
                     const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
                     imageUrl = publicUrlData.publicUrl;
-        
+
                 } catch (error) {
                     console.error('Fout bij het uploaden van de afbeelding:', error);
                     if (messageEl) {
@@ -210,18 +210,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
             } else if (!imageInput.value && !isEditing) {
-                imageUrl = 'https://via.placeholder.com/250';
+                imageUrl = 'https://placehold.co/250x250/E0E0E0/333333?text=Geen+Afbeelding';
             }
-        
+
             const giftData = {
                 title: titleInput.value,
                 description: descriptionInput.value,
-                target_amount: parseFloat(priceInput.value) || 0, 
+                // De correctie is hier: vul zowel `price` als `target_amount` in.
+                price: parseFloat(priceInput.value) || 0,
+                target_amount: parseFloat(priceInput.value) || 0,
                 image_url: imageUrl
             };
-        
+
             let result, error;
-        
+
             if (isEditing) {
                 ({ data: result, error } = await supabase
                     .from('gifts')
@@ -235,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         current_amount: 0.00
                     }]));
             }
-        
+
             if (error) {
                 console.error('Supabase error:', error);
                 if (messageEl) {
