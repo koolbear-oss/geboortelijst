@@ -75,7 +75,7 @@ header p.subtitle {
 .gift-card img {
     width: 100%;
     height: 250px;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
@@ -365,4 +365,99 @@ footer {
 .modal-content button.contribute-btn {
     width: 100%;
     margin-top: 15px;
+}
+
+/* Stijlen voor de admin-pagina */
+.add-gift-section {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.add-gift-btn {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.add-gift-btn:hover {
+    background-color: #0056b3;
+}
+
+.plus-icon {
+    font-size: 1.5em;
+    line-height: 1;
+}
+
+/* Stijlen voor de 'Bewerken'-knop op de cadeaukaarten */
+.gift-card .edit-btn {
+    background-color: #f0f0f0;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    border-radius: 50px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin-top: 10px;
+}
+
+.gift-card .edit-btn:hover {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+/* Algemene stijl voor het nieuwe modale venster */
+.modal-content .form-group {
+    margin-bottom: 20px;
+}
+
+.modal-content .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.modal-content .form-group input, .modal-content .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+.modal-content .form-group textarea {
+    resize: vertical;
+}
+
+.modal-content .submit-btn {
+    width: 100%;
+    margin-top: 15px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content .submit-btn:hover {
+    background-color: #0056b3;
+}
+
+.modal-content .message {
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
 }
