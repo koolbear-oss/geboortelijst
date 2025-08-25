@@ -50,7 +50,7 @@ function renderGifts(gifts) {
                 <h3>${gift.title}</h3>
                 <p>${gift.description}</p>
                 <div class="progress-container">
-                    <div class="progress-bar" style="width: ${((gift.current_amount / gift.target_amount) * 100).toFixed(0)}%;"></div>
+                    <div class="progress-fill" style="width: ${gift.target_amount > 0 ? ((gift.current_amount / gift.target_amount) * 100).toFixed(0) : 0}%;"></div>
                 </div>
                 <p class="amount-text">${(gift.current_amount).toFixed(2)}€ / ${gift.target_amount.toFixed(2)}€</p>
                 <button class="contribute-btn">Bijdragen</button>
