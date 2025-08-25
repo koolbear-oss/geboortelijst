@@ -139,22 +139,21 @@ editGiftForm.addEventListener('submit', async (e) => {
 
     const isEditing = !!giftIdInput.value;
 
-    let imageUrl = imageInput.value; // Gebruik de URL uit het tekstveld als fallback
+    // Begin met een standaardafbeelding als er niets is ingevuld
+    let imageUrl = 'https://via.placeholder.com/250';
 
-    // Controleer of er een nieuw bestand is geüpload
+    // Prioriteit 1: Controleer of er een nieuw bestand is geüpload
     if (imageFileInput.files.length > 0) {
         const file = imageFileInput.files[0];
-        const filePath = `gifts/${Date.now()}_${file.name}`; // Creëer een unieke bestandsnaam
+        const filePath = `gifts/${Date.now()}_${file.name}`;
 
         try {
-            // Upload de afbeelding naar Supabase Storage
             const { data, error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file);
 
             if (uploadError) {
                 throw uploadError;
             }
 
-            // Haal de publieke URL op
             const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
             imageUrl = publicUrlData.publicUrl;
 
@@ -164,6 +163,10 @@ editGiftForm.addEventListener('submit', async (e) => {
             messageEl.style.color = 'red';
             return;
         }
+    } 
+    // Prioriteit 2: Als er geen bestand is geüpload, gebruik dan de URL in het tekstveld
+    else if (imageInput.value) {
+        imageUrl = imageInput.value;
     }
 
     const giftData = {
