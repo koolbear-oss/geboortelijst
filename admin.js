@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const giftData = {
                 title: titleInput.value,
                 description: descriptionInput.value,
-                target_amount: parseFloat(priceInput.value),
+                target_amount: parseFloat(priceInput.value) || 0, 
                 image_url: imageUrl
             };
         
