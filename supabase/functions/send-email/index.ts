@@ -6,6 +6,8 @@ serve(async (req) => {
     // Stel de CORS-headers in om verzoeken van je website toe te staan.
     const headers = {
         'Access-Control-Allow-Origin': 'https://geboortelijst.netlify.app',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
         'Content-Type': 'application/json'
     };
 
