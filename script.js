@@ -26,7 +26,6 @@ async function fetchGifts() {
     renderGifts(gifts);
 }
 
-
 // ===== PAGINA RENDERING =====
 function renderGifts(gifts) {
     const giftGrid = document.getElementById('giftGrid');
@@ -44,16 +43,22 @@ function renderGifts(gifts) {
         const giftCard = document.createElement('div');
         giftCard.className = 'gift-card';
         giftCard.dataset.id = gift.id; // Voeg de gift ID toe als data-attribuut
+
+        // Bereken het percentage, zorg ervoor dat het niet boven 100% uitkomt
+        const percentage = gift.target_amount > 0 ? Math.min((gift.current_amount / gift.target_amount) * 100, 100).toFixed(0) : 0;
+        const isFunded = gift.current_amount >= gift.target_amount;
+
         giftCard.innerHTML = `
             <img src="${gift.image_url}" alt="${gift.title}" onerror="this.src='https://via.placeholder.com/250'">
             <div class="gift-card-content">
                 <h3>${gift.title}</h3>
                 <p>${gift.description}</p>
                 <div class="progress-container">
-                    <div class="progress-fill" style="width: ${gift.target_amount > 0 ? ((gift.current_amount / gift.target_amount) * 100).toFixed(0) : 0}%;"></div>
+                    <div class="progress-fill" style="width: ${percentage}%;"></div>
+                    <span class="progress-percentage">${percentage}%</span>
                 </div>
                 <p class="amount-text">${(gift.current_amount).toFixed(2)}€ / ${gift.target_amount.toFixed(2)}€</p>
-                <button class="contribute-btn">Bijdragen</button>
+                <button class="contribute-btn ${isFunded ? 'disabled' : ''}" ${isFunded ? 'disabled' : ''}>${isFunded ? 'Bedankt!' : 'Bijdragen'}</button>
             </div>
         `;
         giftGrid.appendChild(giftCard);
