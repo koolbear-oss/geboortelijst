@@ -133,31 +133,43 @@ async function handlePaymentFormSubmit(e) {
 }
 
 // ===== BETAALFUNCTIES =====
+// ===== BETAALFUNCTIES =====
 async function initiatePayment(giftId, amount, name, email) {
     try {
-        const response = await fetch(`${window.location.origin}/.netlify/functions/create-payment`, {
+        const gift = allGifts.find(g => g.id === giftId);
+        const giftTitle = gift ? gift.title : 'Onbekend Cadeau';
+
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
             method: 'POST',
             body: JSON.stringify({
-                id: giftId,
+                title: giftTitle,
                 amount: parseFloat(amount).toFixed(2),
-                name: name || 'Anonymous',
-                email: email || ''
+                email: email
             }),
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
+            const data = await response.json();
             console.error('API Error:', data);
             alert('Er is een fout opgetreden: ' + (data.error || 'Onbekende fout'));
             return;
         }
 
-        window.location.href = data.checkoutUrl;
+        // Als de e-mail succesvol is verzonden, toont de functie een succesvolle betalingspagina.
+        // Dit is een placeholder voor de daadwerkelijke betalingsintegratie die je later wilt toevoegen.
+        alert('Bedankt! Je e-mail is succesvol verzonden.');
+        
+        // Optioneel: sluit de modal en ververs de pagina
+        closePaymentModal();
+        fetchGifts();
+
     } catch (error) {
         console.error('Fetch Error:', error);
-        alert('There has been a connection error.');
+        alert('Er is een verbindingsfout opgetreden.');
     }
 }
 
