@@ -14,17 +14,31 @@
         </div>
     </header>
 
-    <main class="container">
+    <div class="login-container" id="loginFormContainer">
+        <h2>Admin Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Wachtwoord</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="submit-btn">Login</button>
+            <p id="authMessage" class="message"></p>
+        </form>
+    </div>
+
+    <main class="container" id="adminContent" style="display:none;">
         <section class="add-gift-section">
             <button id="addGiftBtn" class="add-gift-btn">
                 <span class="plus-icon">+</span> Add New Gift
             </button>
         </section>
-
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search for gifts...">
         </div>
-
         <section class="gift-grid" id="adminGiftGrid">
             <p class="loading-message">Loading gifts...</p>
         </section>
@@ -42,7 +56,7 @@
                 </div>
                 <div class="form-group">
                     <label for="description">Description</label>
-                    <textarea id="description" required></textarea>
+                    <textarea id="description"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="price">Price (€)</label>

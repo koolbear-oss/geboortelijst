@@ -23,7 +23,13 @@ let imageInput;
 let imageFileInput;
 let submitBtn;
 let messageEl;
-let searchInput; // Nieuwe referentie
+let searchInput;
+
+// Nieuwe referenties voor het inlogscherm
+const loginFormContainer = document.getElementById('loginFormContainer');
+const loginForm = document.getElementById('loginForm');
+const adminContent = document.getElementById('adminContent');
+const authMessage = document.getElementById('authMessage');
 
 // ===== FUNCTIES VOOR DATA OPHALEN EN WEERGEVEN =====
 async function fetchAndRenderGifts() {
@@ -70,7 +76,7 @@ function renderGifts(gifts) {
             <img src="${imageUrl}" alt="${gift.title}">
             <div class="gift-card-content">
                 <h3>${gift.title}</h3>
-                <p>${gift.description}</p>
+                <p>${gift.description || ''}</p>
                 <p class="amount-text">Huidig: ${(gift.current_amount).toFixed(2)}€ / Doel: ${gift.target_amount.toFixed(2)}€</p>
                 <div class="card-actions">
                     <button class="edit-btn" data-id="${gift.id}">Bewerken</button>
@@ -115,9 +121,9 @@ function closeModal() {
     }
 }
 
-// ===== INITIALISATIE EN EVENT LISTENERS =====
-document.addEventListener('DOMContentLoaded', () => {
-    // Definieer de referenties NA het laden van de pagina
+// ===== AUTHENTICATIE EN INITIALISATIE =====
+document.addEventListener('DOMContentLoaded', async () => {
+    // Definieer de referenties pas na het laden van de DOM
     adminGiftGrid = document.getElementById('adminGiftGrid');
     addGiftBtn = document.getElementById('addGiftBtn');
     editGiftModal = document.getElementById('editGiftModal');
@@ -132,12 +138,74 @@ document.addEventListener('DOMContentLoaded', () => {
     imageFileInput = document.getElementById('image_file');
     submitBtn = editGiftForm ? editGiftForm.querySelector('.submit-btn') : null;
     messageEl = document.getElementById('message');
-    searchInput = document.getElementById('searchInput'); // Initialiseer de zoekbalk
+    searchInput = document.getElementById('searchInput');
 
-    // Haal de cadeaus op en render ze
-    fetchAndRenderGifts();
-    
-    // Voeg event listeners toe
+    // Check de inlogstatus bij het laden van de pagina
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+        // Gebruiker is ingelogd, toon de admin-pagina
+        showAdminContent();
+    } else {
+        // Gebruiker is niet ingelogd, toon het inlogscherm
+        showLoginForm();
+    }
+
+    // Event listener voor het login-formulier
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const { error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                authMessage.textContent = 'Fout: ' + error.message;
+                authMessage.style.color = 'red';
+            } else {
+                authMessage.textContent = 'Succesvol ingelogd!';
+                authMessage.style.color = 'green';
+                showAdminContent();
+            }
+        });
+    }
+
+    // Functies om de schermen te wisselen
+    function showLoginForm() {
+        if (loginFormContainer) loginFormContainer.style.display = 'block';
+        if (adminContent) adminContent.style.display = 'none';
+    }
+
+    async function showAdminContent() {
+        if (loginFormContainer) loginFormContainer.style.display = 'none';
+        if (adminContent) adminContent.style.display = 'block';
+        // Voeg een knop toe om uit te loggen
+        const logoutBtn = document.createElement('button');
+        logoutBtn.textContent = 'Uitloggen';
+        logoutBtn.classList.add('logout-btn');
+        logoutBtn.style.cssText = 'position: absolute; top: 20px; right: 20px;';
+        logoutBtn.addEventListener('click', async () => {
+            const { error } = await supabase.auth.signOut();
+            if (!error) {
+                showLoginForm();
+                // Verwijder de uitlogknop
+                logoutBtn.remove();
+            }
+        });
+
+        const headerContainer = document.querySelector('header .container');
+        if (headerContainer) {
+            headerContainer.appendChild(logoutBtn);
+        }
+
+        fetchAndRenderGifts(); // Laad de cadeaus nadat de gebruiker is ingelogd
+    }
+
+    // Voeg event listeners toe aan de admin-pagina
     if (addGiftBtn) {
         addGiftBtn.addEventListener('click', () => {
             openModal();
@@ -179,30 +247,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if (editGiftForm) {
         editGiftForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-        
+
             if (messageEl) {
                 messageEl.textContent = 'Bezig met verwerken...';
                 messageEl.style.color = '#333';
             }
-        
+
+            // Haal de ID van de ingelogde gebruiker op
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                console.error('Gebruiker is niet ingelogd.');
+                if (messageEl) {
+                    messageEl.textContent = '❌ Fout: Je moet ingelogd zijn om cadeaus te beheren.';
+                    messageEl.style.color = 'red';
+                }
+                return;
+            }
+            
             const isEditing = !!giftIdInput.value;
-        
             let imageUrl = imageInput.value;
-        
+
             if (imageFileInput.files.length > 0) {
                 const file = imageFileInput.files[0];
                 const filePath = `gifts/${Date.now()}_${file.name}`;
-        
+
                 try {
                     const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file);
-        
+
                     if (uploadError) {
                         throw uploadError;
                     }
-        
+
                     const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
                     imageUrl = publicUrlData.publicUrl;
-        
+
                 } catch (error) {
                     console.error('Fout bij het uploaden van de afbeelding:', error);
                     if (messageEl) {
@@ -214,17 +292,19 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (!imageInput.value && !isEditing) {
                 imageUrl = 'https://placehold.co/250x250/E0E0E0/333333?text=Geen+Afbeelding';
             }
-        
+
             const giftData = {
                 title: titleInput.value,
                 description: descriptionInput.value,
                 price: parseFloat(priceInput.value) || 0,
                 target_amount: parseFloat(priceInput.value) || 0,
-                image_url: imageUrl
+                image_url: imageUrl,
+                // Voeg de unieke user_id toe aan de giftData
+                user_id: user.id
             };
-        
+
             let result, error;
-        
+
             if (isEditing) {
                 ({ data: result, error } = await supabase
                     .from('gifts')
@@ -233,12 +313,14 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 ({ data: result, error } = await supabase
                     .from('gifts')
-                    .insert([{
-                        ...giftData,
-                        current_amount: 0.00
-                    }]));
+                    .insert([
+                        {
+                            ...giftData,
+                            current_amount: 0.00
+                        }
+                    ]));
             }
-        
+
             if (error) {
                 console.error('Supabase error:', error);
                 if (messageEl) {
