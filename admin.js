@@ -282,27 +282,4 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-
-    const searchInput = document.getElementById('searchInput');
-
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            // Zoek alle gift-cards in het grid
-            const giftCards = document.getElementById('giftGrid').querySelectorAll('.gift-card');
-            
-            giftCards.forEach(card => {
-                // Haal de titel en beschrijving op
-                const title = card.querySelector('h3').textContent.toLowerCase();
-                const description = card.querySelector('p').textContent.toLowerCase();
-                
-                // Toon de kaart als de zoekterm in de titel of beschrijving staat
-                if (title.includes(query) || description.includes(query)) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
-    }
 });
