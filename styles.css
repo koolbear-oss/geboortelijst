@@ -536,3 +536,21 @@ footer {
     border-color: #007BFF;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+
+/* Styling voor de zoekbalk */
+.search-container {
+    position: sticky; /* Zorgt ervoor dat het element blijft plakken */
+    top: 0; /* Plakt het bovenaan de pagina */
+    z-index: 10; /* Zorgt ervoor dat het boven andere elementen zweeft */
+    background-color: #F4F4F4; /* Een achtergrondkleur om de inhoud eronder te verbergen */
+    padding: 15px 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.search-container input {
+    width: 100%;
+    padding: 12px 20px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    font-size: 1em;
+}
