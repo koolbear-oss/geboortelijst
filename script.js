@@ -148,15 +148,27 @@ async function handlePaymentFormSubmit(event) {
     }
 }
 
-// Functie die de UI bijwerkt wanneer de gebruiker terugkeert van de betalingspagina.
-function handleReturnFromPayment() {
+async function handleReturnFromPayment() {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('payment') === 'success') {
-        // Laad de cadeaus opnieuw om de meest recente status te tonen
-        fetchGifts();
-        
-        // Verwijder de parameter uit de URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+    const paymentStatus = urlParams.get('payment');
+    const giftId = urlParams.get('giftId'); // Extra metadata toevoegen aan de redirect URL is handig
+
+    if (paymentStatus === 'success') {
+        // Toon een tijdelijk succesbericht
+        showTemporaryMessage('✅ Betaling succesvol, de lijst wordt bijgewerkt...');
+
+        // Wacht een moment om de webhook de tijd te geven
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Haal de cadeaus opnieuw op om de UI bij te werken
+        await fetchGifts();
+
+        // Verwijder de URL-parameter om te voorkomen dat de melding opnieuw verschijnt bij een refresh
+        const newUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+        window.history.replaceState({ path: newUrl }, '', newUrl);
+
+        // Verwijder het tijdelijke bericht
+        showTemporaryMessage('');
     }
 }
 

@@ -35,10 +35,10 @@ exports.handler = async (event, context) => {
         const payment = await mollieClient.payments.create({
             amount: { value: parseFloat(amount).toFixed(2), currency: 'EUR' },
             description: `Bijdrage voor: ${giftData.title}`,
-            redirectUrl: `${process.env.URL}/index.html?payment=success`, // De URL waar de gebruiker naartoe wordt gestuurd
+            redirectUrl: `${process.env.URL}/index.html?payment=success&giftId=${giftId}`,
             webhookUrl: `${process.env.URL}/.netlify/functions/payment-webhook`, // De URL van je webhook functie
-            metadata: { 
-                gift_id: giftId, 
+            metadata: {
+                gift_id: giftId,
                 contributor_name: name || 'Anoniem',
                 contributor_email: email
             }
