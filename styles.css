@@ -122,7 +122,7 @@ header p.subtitle {
 }
 
 .gift-card-content {
-    padding: 15px; /* Compacter: minder padding */
+    padding: 10px; /* Compacter: minder padding */
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -135,12 +135,12 @@ header p.subtitle {
 }
 
 .gift-card h3 {
-    margin: 0 0 5px; /* Minder marge onder de titel */
+    margin: 5px 0; /* Minder marge onder de titel */
     font-size: 1.2em;
 }
 
 .gift-card p {
-    margin: 0 0 10px; /* Minder marge onder de beschrijving */
+    margin: 0; /* Minder marge onder de beschrijving */
     color: #6c757d;
 }
 
