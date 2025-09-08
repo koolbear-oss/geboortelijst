@@ -121,6 +121,29 @@ function closeModal() {
     }
 }
 
+// Zoekbalk-functionaliteit in een aparte functie
+function setupSearch(gridElement) {
+    const searchInput = document.getElementById('searchInput');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const giftCards = gridElement.querySelectorAll('.gift-card');
+
+            giftCards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+
+                if (title.includes(query) || description.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    }
+}
+
 // ===== AUTHENTICATIE EN INITIALISATIE =====
 document.addEventListener('DOMContentLoaded', async () => {
     // Definieer de referenties pas na het laden van de DOM
@@ -348,20 +371,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Zoekbalk-functionaliteit
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const giftCards = adminGiftGrid.querySelectorAll('.gift-card');
-            giftCards.forEach(card => {
-                const title = card.querySelector('h3').textContent.toLowerCase();
-                const description = card.querySelector('p').textContent.toLowerCase();
-                if (title.includes(query) || description.includes(query)) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
-    }
 });
