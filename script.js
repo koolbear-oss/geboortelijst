@@ -31,16 +31,9 @@ async function fetchGifts() {
 
 // Functie om de terugkeer van de betaling af te handelen
 function handleReturnFromPayment() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const paymentStatus = urlParams.get('status');
-
-    if (paymentStatus === 'success') {
-        console.log('Payment successful. Updating gift list...');
-        // Verwijder de URL-parameter
-        history.replaceState({}, document.title, window.location.pathname);
-        // Roep de functie aan om de cadeaus opnieuw op te halen
-        fetchGifts();
-    }
+    // Laad de cadeaus opnieuw om de meest recente status te tonen
+    // (wordt direct geactiveerd na terugkeer van Mollie)
+    fetchGifts();
 }
 
 // ===== PAGINA RENDERING =====
