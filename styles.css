@@ -5,7 +5,8 @@
     --text-color: #333333; /* Donkergrijs voor leesbaarheid */
     --background-color: #f8f9fa; /* Zeer lichte grijze achtergrond */
     --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Een subtiele schaduw */
-    --corner-radius: 4px; /* Subtiel afgeronde hoeken */
+    --corner-radius: 8px; /* Subtiel afgeronde hoeken */
+    --transition-speed: 0.3s;
 }
 
 body {
@@ -31,10 +32,12 @@ h1, h2, h3, h4 {
     padding: 20px;
 }
 
-/* Kopteksten en introductie */
+/* ---------------------------------- */
+/* --- ALGEMEEN: Kopteksten, zoekbalk, etc. --- */
+/* ---------------------------------- */
 header {
     text-align: center;
-    padding: 25px 20px; /* Compacter header-blok */
+    padding: 25px 20px;
     background-color: #ffffff;
     box-shadow: 0 2px 5px rgba(0,0,0,0.08);
 }
@@ -42,7 +45,7 @@ header {
 header h1 {
     font-size: 2.2em;
     color: var(--text-color);
-    margin-bottom: 5px; /* Minder ruimte onder de titel */
+    margin-bottom: 5px;
 }
 
 header p.subtitle {
@@ -70,10 +73,10 @@ header p.subtitle {
     width: 100%;
     padding: 12px 20px;
     border: 1px solid #ced4da;
-    border-radius: var(--corner-radius); /* Rechtere hoeken */
+    border-radius: 25px;
     font-size: 1em;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed) ease;
 }
 
 #searchInput:focus {
@@ -82,23 +85,26 @@ header p.subtitle {
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
+/* ---------------------------------- */
+/* --- GEBOORTELIJST PAGINA (index.html) --- */
+/* ---------------------------------- */
 /* Cadeau Grid */
 .gift-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
+    gap: 20px; /* Minder ruimte tussen de tegels */
 }
 
 /* Cadeau Kaart */
 .gift-card {
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
-    border-radius: var(--corner-radius); /* Rechtere hoeken */
+    border-radius: var(--corner-radius);
     box-shadow: var(--card-shadow);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
 }
 
 .gift-card:hover {
@@ -116,38 +122,25 @@ header p.subtitle {
 }
 
 .gift-card-content {
-    padding: 20px;
+    padding: 15px; /* Compacter: minder padding */
     display: flex;
-    flex-direction: column; /* De elementen in een kolom plaatsen */
+    flex-direction: column;
     flex-grow: 1;
 }
 
 .text-content {
-    flex-grow: 1; /* Dit element vult de resterende verticale ruimte */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
 }
 
-.text-content h3 {
-    margin: 0 0 10px;
-    font-size: 1.3em;
-}
-
-.text-content p {
-    margin: 0 0 15px;
-    /* max-height: 100px;  Dit kan helpen om de beschrijving te beperken indien nodig */
-    overflow: hidden;
-    color: #6c757d;
-}
-
 .gift-card h3 {
-    margin: 0 0 10px;
-    font-size: 1.3em;
+    margin: 0 0 5px; /* Minder marge onder de titel */
+    font-size: 1.2em;
 }
 
 .gift-card p {
-    margin: 0 0 15px;
-    flex-grow: 1;
+    margin: 0 0 10px; /* Minder marge onder de beschrijving */
     color: #6c757d;
 }
 
@@ -155,16 +148,16 @@ header p.subtitle {
 .progress-container {
     background-color: #e9ecef;
     border-radius: var(--corner-radius);
-    height: 20px;
+    height: 15px; /* Compacter: lagere hoogte */
     position: relative;
-    margin-bottom: 10px;
+    margin-bottom: 8px; /* Minder marge */
     overflow: hidden;
 }
 
 .progress-fill {
     height: 100%;
-    background-color: var(--accent-color); /* Gebruik de accentkleur */
-    transition: width 0.4s ease;
+    background-color: var(--accent-color);
+    transition: width var(--transition-speed) ease;
     border-radius: var(--corner-radius);
 }
 
@@ -175,7 +168,7 @@ header p.subtitle {
     transform: translate(-50%, -50%);
     color: #ffffff;
     font-weight: bold;
-    font-size: 0.8em;
+    font-size: 0.75em;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
     z-index: 2;
 }
@@ -186,6 +179,7 @@ header p.subtitle {
     color: #495057;
     margin-top: 5px;
     text-align: right;
+    font-size: 0.9em; /* Iets kleiner lettertype */
 }
 
 /* Bijdrage knop */
@@ -193,14 +187,14 @@ header p.subtitle {
     background-color: var(--primary-color);
     color: #ffffff;
     border: none;
-    padding: 12px 25px;
-    border-radius: var(--corner-radius); /* Rechtere hoeken */
+    padding: 10px 20px; /* Compacter: minder padding */
+    border-radius: 25px; /* Afgeronde hoeken voor knop */
     font-size: 1em;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    transition: background-color var(--transition-speed) ease, transform 0.2s ease, box-shadow var(--transition-speed) ease;
     width: 100%;
-    margin-top: 15px;
+    margin-top: 10px; /* Minder marge */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -273,7 +267,7 @@ header p.subtitle {
     max-width: 500px;
     width: 90%;
     position: relative;
-    animation: fadeIn 0.3s;
+    animation: fadeIn var(--transition-speed) ease;
 }
 
 .close-btn {
@@ -317,11 +311,12 @@ header p.subtitle {
     font-weight: 600;
 }
 
-.form-group input {
+.form-group input, .form-group textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid #ced4da;
     border-radius: var(--corner-radius);
+    box-sizing: border-box; /* Zorg ervoor dat padding de breedte niet beïnvloedt */
 }
 
 .form-group small {
@@ -329,6 +324,12 @@ header p.subtitle {
     margin-top: 5px;
     color: #6c757d;
     font-size: 0.8em;
+}
+
+.message {
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
 }
 
 /* Toast melding */
@@ -348,6 +349,97 @@ footer {
     font-size: 0.9em;
 }
 
+/* Animatie voor de modal */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------------------- */
+/* --- ADMIN PAGINA (admin.html) --- */
+/* ---------------------------------- */
+.login-container {
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: var(--corner-radius);
+    box-shadow: var(--card-shadow);
+}
+
+.add-gift-section {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.add-gift-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color var(--transition-speed) ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-gift-btn:hover {
+    background-color: #1e7e34;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.plus-icon {
+    font-size: 1.5em;
+    line-height: 1;
+}
+
+/* Flex-container voor de admin-knoppen */
+.gift-card-buttons {
+    display: flex;
+    justify-content: flex-end; /* Knoppen rechts uitlijnen */
+    align-items: center;
+    gap: 10px; /* Ruimte tussen de knoppen */
+    margin-top: 10px; /* Ruimte boven de knoppen */
+}
+
+/* Stijl voor de 'Bewerken'-knop */
+.gift-card .edit-btn,
+.gift-card .delete-btn {
+    padding: 8px 15px; /* Compacter: minder padding */
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gift-card .edit-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.gift-card .edit-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Stijl voor de 'Verwijderen'-knop */
+.gift-card .delete-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+}
+
+.gift-card .delete-btn:hover {
+    background-color: #d32f2f;
+}
+
 /* Media Queries voor mobiele responsiviteit */
 @media (max-width: 768px) {
     .gift-grid {
@@ -356,10 +448,7 @@ footer {
     .container {
         padding: 10px;
     }
-}
-
-/* Animatie voor de modal */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    .gift-card-content {
+        padding: 10px; /* Extra compact op mobiel */
+    }
 }
