@@ -38,32 +38,38 @@ async function fetchGifts() {
 
 // Functie om de cadeaus weer te geven in de UI
 function renderGifts(gifts) {
-    const giftGrid = document.getElementById('giftGrid');
-    if (!giftGrid) return;
-    giftGrid.innerHTML = '';
+    // Controleren of het cadeau volledig gedoneerd is
+    const isDonated = gift.current_amount >= gift.target_amount;
 
-    gifts.forEach(gift => {
-        const percentage = gift.target_amount > 0 ? Math.min((gift.current_amount / gift.target_amount) * 100, 100).toFixed(0) : 0;
-        const isFunded = gift.current_amount >= gift.target_amount;
-        const giftCard = document.createElement('div');
-        giftCard.className = 'gift-card';
-        giftCard.dataset.id = gift.id;
+    // Bereken de voortgang in percentage
+    const percentage = Math.min((gift.current_amount / gift.target_amount) * 100, 100);
 
-        giftCard.innerHTML = `
-            <img src="${gift.image_url}" alt="${gift.title}" onerror="this.src='https://via.placeholder.com/250'">
+    // Bepaal de URL van de afbeelding, of gebruik een placeholder
+    const imageUrl = gift.image_url || 'https://via.placeholder.com/400';
+
+    return `
+        <div class="gift-card ${isDonated ? 'donated' : ''}" data-id="${gift.id}">
+            <div class="gift-card-image" style="background-image: url('${imageUrl}');"></div>
             <div class="gift-card-content">
                 <h3>${gift.title}</h3>
                 <p>${gift.description}</p>
-                <div class="progress-container">
-                    <div class="progress-fill" style="width: ${percentage}%;"></div>
-                    <span class="progress-percentage">${percentage}%</span>
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: ${percentage}%;"></div>
+                    </div>
+                    <div class="progress-info">
+                        <span class="progress-percentage">${Math.round(percentage)}%</span>
+                        <span class="progress-amount">€${gift.current_amount.toFixed(2)} / €${gift.target_amount.toFixed(2)}</span>
+                    </div>
                 </div>
-                <p class="amount-text">${(gift.current_amount).toFixed(2)}€ / ${gift.target_amount.toFixed(2)}€</p>
-                <button class="contribute-btn ${isFunded ? 'disabled' : ''}" ${isFunded ? 'disabled' : ''}>${isFunded ? 'Thanks!' : 'Contribute'}</button>
             </div>
-        `;
-        giftGrid.appendChild(giftCard);
-    });
+            <div class="gift-card-actions">
+                <button class="contribute-btn" data-id="${gift.id}" ${isDonated ? 'disabled' : ''}>
+                    ${isDonated ? 'Reeds Voltooid ✅' : 'Draag bij 💝'}
+                </button>
+            </div>
+        </div>
+    `;
 }
 
 // Functie voor de zoekbalk
