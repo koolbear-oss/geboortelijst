@@ -109,7 +109,8 @@ header p.subtitle {
 .gift-card img {
     width: 100%;
     height: 200px;
-    object-fit: cover;
+    object-fit: contain;
+    background-color: #ffffff;
     display: block;
     border-bottom: 1px solid #e0e0e0;
 }
@@ -117,8 +118,26 @@ header p.subtitle {
 .gift-card-content {
     padding: 20px;
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* De elementen in een kolom plaatsen */
     flex-grow: 1;
+}
+
+.text-content {
+    flex-grow: 1; /* Dit element vult de resterende verticale ruimte */
+    display: flex;
+    flex-direction: column;
+}
+
+.text-content h3 {
+    margin: 0 0 10px;
+    font-size: 1.3em;
+}
+
+.text-content p {
+    margin: 0 0 15px;
+    /* max-height: 100px;  Dit kan helpen om de beschrijving te beperken indien nodig */
+    overflow: hidden;
+    color: #6c757d;
 }
 
 .gift-card h3 {
