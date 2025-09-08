@@ -11,49 +11,47 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ===== PAGINA INITIALISATIE EN DATA OPHALEN =====
 let allGifts = [];
+let paymentModal;
+let closeBtn;
+let paymentForm;
 
+// Functie om de cadeaus op te halen en weer te geven
 async function fetchGifts() {
     console.log('Fetching gifts from Supabase...');
-    // Haal alle data op uit de 'gifts' tabel
+    const giftGrid = document.getElementById('giftGrid');
+    if (!giftGrid) return;
+    giftGrid.innerHTML = ''; // Maak de grid eerst leeg
+
     const { data: gifts, error } = await supabase
         .from('gifts')
         .select('*');
 
     if (error) {
         console.error('Error fetching gifts:', error);
+        giftGrid.innerHTML = '<p class="error-message">Helaas, de cadeaus konden niet geladen worden. Probeer het later opnieuw.</p>';
         return;
     }
     
-    // Sla de gifts array globaal op zodat we deze later kunnen benaderen
-    allGifts = gifts;
-    renderGifts(allGifts);
+    if (gifts && gifts.length > 0) {
+        allGifts = gifts;
+        renderGifts(gifts);
+    } else {
+        giftGrid.innerHTML = '<p class="no-gifts-message">Er zijn nog geen cadeaus toegevoegd. Binnenkort vind je hier een prachtige selectie!</p>';
+    }
 }
 
-// Functie om de terugkeer van de betaling af te handelen
-function handleReturnFromPayment() {
-    // Laad de cadeaus opnieuw om de meest recente status te tonen
-    // (wordt direct geactiveerd na terugkeer van Mollie)
-    fetchGifts();
-}
-
-// ===== PAGINA RENDERING =====
+// Functie om de cadeaus weer te geven in de UI
 function renderGifts(gifts) {
     const giftGrid = document.getElementById('giftGrid');
-    giftGrid.innerHTML = ''; // Maak het rooster leeg voor we de kaarten renderen
-
-    if (!gifts || gifts.length === 0) {
-        giftGrid.innerHTML = '<p>Er zijn op dit moment geen cadeaus beschikbaar.</p>';
-        return;
-    }
+    if (!giftGrid) return;
+    giftGrid.innerHTML = ''; // Leeg de grid voordat we nieuwe items toevoegen
 
     gifts.forEach(gift => {
-        const giftCard = document.createElement('div');
-        giftCard.className = 'gift-card';
-        giftCard.dataset.id = gift.id; // Voeg de gift ID toe als data-attribuut
-
-        // Bereken het percentage, zorg ervoor dat het niet boven 100% uitkomt
         const percentage = gift.target_amount > 0 ? Math.min((gift.current_amount / gift.target_amount) * 100, 100).toFixed(0) : 0;
         const isFunded = gift.current_amount >= gift.target_amount;
+        const giftCard = document.createElement('div');
+        giftCard.className = 'gift-card';
+        giftCard.dataset.id = gift.id;
 
         giftCard.innerHTML = `
             <img src="${gift.image_url}" alt="${gift.title}" onerror="this.src='https://via.placeholder.com/250'">
@@ -72,26 +70,34 @@ function renderGifts(gifts) {
     });
 }
 
-// ===== INTERACTIEVE FUNCTIES EN MODALS =====
-const paymentModal = document.getElementById('paymentModal');
-const closeBtn = paymentModal.querySelector('.close-btn');
-const paymentForm = document.getElementById('paymentForm');
+// Functie voor de zoekbalk
+function setupSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return;
 
-// Open de modal en vul deze met de cadeau-details
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filteredGifts = allGifts.filter(gift => 
+            gift.title.toLowerCase().includes(query) ||
+            gift.description.toLowerCase().includes(query)
+        );
+        renderGifts(filteredGifts);
+    });
+}
+
+// Functie om de betaalmodal te openen
 function openPaymentModal(gift) {
+    if (!paymentModal) return;
     document.getElementById('modal-image').src = gift.image_url;
     document.getElementById('modal-title').textContent = gift.title;
     document.getElementById('giftIdInput').value = gift.id;
-
-    // Reset het formulier
     paymentForm.reset();
-    
-    // Toon de modal
     paymentModal.style.display = 'flex';
 }
 
 // Sluit de modal
 function closePaymentModal() {
+    if (!paymentModal) return;
     paymentModal.style.display = 'none';
 }
 
@@ -100,8 +106,6 @@ function handleContributeClick(e) {
     if (e.target.classList.contains('contribute-btn')) {
         const giftCard = e.target.closest('.gift-card');
         const giftId = giftCard.dataset.id;
-        
-        // Zoek het cadeau in de gifts array (deze is globaal gezet in renderGifts)
         const gift = allGifts.find(g => g.id == giftId);
         if (gift) {
             openPaymentModal(gift);
@@ -109,10 +113,9 @@ function handleContributeClick(e) {
     }
 }
 
-// Functie om de betaling te initiëren via de Netlify Function (Mollie)
+// Functie om het betaalformulier te verwerken
 async function handlePaymentFormSubmit(event) {
     event.preventDefault();
-    
     const giftId = document.getElementById('giftIdInput').value;
     const amount = parseFloat(document.getElementById('amountInput').value);
     const name = document.getElementById('nameInput').value || 'Anoniem';
@@ -124,91 +127,60 @@ async function handlePaymentFormSubmit(event) {
     }
 
     try {
-        // Roep de Mollie-functie aan op je Netlify project
         const response = await fetch('/.netlify/functions/create-payment', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                giftId: giftId,
-                amount: amount,
-                name: name,
-                email: email
-            })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            // Doorverwijzen naar de Mollie betaalpagina
-            window.location.href = data.checkoutUrl;
-        } else {
-            // Toon een foutmelding
-            alert(`Er is een fout opgetreden: ${data.error}`);
-            console.error('API Error:', data.error);
-        }
-
-    } catch (error) {
-        console.error('Fetch Error:', error);
-        alert('Er is een verbindingsfout opgetreden.');
-    }
-}
-
-// ===== BETAALFUNCTIES =====
-async function initiatePayment(giftId, amount, name, email) {
-    try {
-        const gift = allGifts.find(g => g.id === giftId);
-        const giftTitle = gift ? gift.title : 'Onbekend Cadeau';
-
-        const response = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
-            method: 'POST',
-            body: JSON.stringify({
-                title: giftTitle,
-                amount: parseFloat(amount).toFixed(2),
-                email: email
-            }),
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-            }
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ giftId, amount, name, email }),
         });
 
         if (!response.ok) {
-            const data = await response.json();
-            console.error('API Error:', data);
-            alert('Er is een fout opgetreden: ' + (data.error || 'Onbekende fout'));
-            return;
+            const errorData = await response.json();
+            throw new Error(`Netwerkrespons was niet ok: ${errorData.error}`);
         }
 
-        // Als de e-mail succesvol is verzonden, toont de functie een succesvolle betalingspagina.
-        // Dit is een placeholder voor de daadwerkelijke betalingsintegratie die je later wilt toevoegen.
-        alert('Bedankt! Je e-mail is succesvol verzonden.');
-        
-        // Optioneel: sluit de modal en ververs de pagina
-        closePaymentModal();
-        fetchGifts();
+        const data = await response.json();
+        // Stuur de gebruiker door naar de Mollie checkout pagina
+        window.location.href = data.checkoutUrl;
 
     } catch (error) {
-        console.error('Fetch Error:', error);
-        alert('Er is een verbindingsfout opgetreden.');
+        console.error('Fout bij het aanmaken van de betaling:', error);
+        alert('Er is een fout opgetreden bij het aanmaken van de betaling.');
+    }
+}
+
+// Functie die de UI bijwerkt wanneer de gebruiker terugkeert van de betalingspagina.
+function handleReturnFromPayment() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment') === 'success') {
+        // Laad de cadeaus opnieuw om de meest recente status te tonen
+        fetchGifts();
+        
+        // Verwijder de parameter uit de URL
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 }
 
 // ===== INITIALISATIE =====
 document.addEventListener('DOMContentLoaded', () => {
+    // Referenties naar HTML-elementen na DOM-laden
+    paymentModal = document.getElementById('paymentModal');
+    closeBtn = document.querySelector('#paymentModal .close-btn');
+    paymentForm = document.getElementById('paymentForm');
+
     // Laad de cadeaus van Supabase
     fetchGifts();
     
-    // Voeg event listener toe aan de gift grid om clicks te delegeren
+    // Controleer of de gebruiker terugkomt van een succesvolle betaling
+    handleReturnFromPayment();
+
+    // Voeg event listeners toe aan de gift grid om clicks te delegeren
     const giftGrid = document.getElementById('giftGrid');
     if (giftGrid) {
         giftGrid.addEventListener('click', handleContributeClick);
     }
     
     // Voeg event listeners toe aan de modal
-    const amountInput = document.getElementById('amountInput');
-    closeBtn.addEventListener('click', closePaymentModal);
+    if (closeBtn) closeBtn.addEventListener('click', closePaymentModal);
     window.addEventListener('click', (e) => {
         if (e.target === paymentModal) {
             closePaymentModal();
@@ -216,24 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Voeg event listener toe aan het formulier
-    paymentForm.addEventListener('submit', handlePaymentFormSubmit);
+    if (paymentForm) paymentForm.addEventListener('submit', handlePaymentFormSubmit);
+
+    // Zoekbalk-functionaliteit inschakelen
+    setupSearch();
 });
-
-// Functie die de UI bijwerkt wanneer de gebruiker terugkeert van de betalingspagina.
-// Deze wordt hieronder aangeroepen.
-function handleReturnFromPayment() {
-    // Haal de URL-parameters op
-    const urlParams = new URLSearchParams(window.location.search);
-    
-    // Controleer of de 'payment=success' parameter aanwezig is
-    if (urlParams.get('payment') === 'success') {
-        // Laad de cadeaus opnieuw om de meest recente status te tonen
-        fetchGifts();
-        
-        // Verwijder de parameter uit de URL en dwing een herlading
-        // Dit zorgt voor een schone URL en frisse UI zonder refresh
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-}
-
-handleReturnFromPayment();
