@@ -197,8 +197,6 @@ async function initiatePayment(giftId, amount, name, email) {
 
 // ===== INITIALISATIE =====
 document.addEventListener('DOMContentLoaded', () => {
-    // Check de URL bij het laden van de pagina voor een succesvolle betaling
-    handleReturnFromPayment();
     // Laad de cadeaus van Supabase
     fetchGifts();
     
@@ -206,27 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const giftGrid = document.getElementById('giftGrid');
     if (giftGrid) {
         giftGrid.addEventListener('click', handleContributeClick);
-    }
-
-    // Zoekbalk-functionaliteit voor de publieke pagina
-    const searchInput = document.getElementById('searchInput');
-
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const giftCards = document.getElementById('giftGrid').querySelectorAll('.gift-card');
-            
-            giftCards.forEach(card => {
-                const title = card.querySelector('h3').textContent.toLowerCase();
-                const description = card.querySelector('p').textContent.toLowerCase();
-                
-                if (title.includes(query) || description.includes(query)) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
     }
     
     // Voeg event listeners toe aan de modal
@@ -241,3 +218,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Voeg event listener toe aan het formulier
     paymentForm.addEventListener('submit', handlePaymentFormSubmit);
 });
+
+// Functie die de UI bijwerkt wanneer de gebruiker terugkeert van de betalingspagina.
+// Deze wordt hieronder aangeroepen.
+function handleReturnFromPayment() {
+    // Haal de URL-parameters op
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Controleer of de 'payment=success' parameter aanwezig is
+    if (urlParams.get('payment') === 'success') {
+        // Laad de cadeaus opnieuw om de meest recente status te tonen
+        fetchGifts();
+        
+        // Verwijder de parameter uit de URL en dwing een herlading
+        // Dit zorgt voor een schone URL en frisse UI zonder refresh
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+}
+
+handleReturnFromPayment();
