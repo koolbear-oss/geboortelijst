@@ -1,41 +1,36 @@
-// netlify/functions/payment-webhook.js
+// .netlify/functions/payment-webhook.js
 
-const { createMollieClient } = require('@mollie/api-client'); // <-- Aangepast
+const { createMollieClient } = require('@mollie/api-client');
 const { createClient } = require('@supabase/supabase-js');
 
 exports.handler = async (event, context) => {
-    // Check of het een POST-request is
+    // Weiger alle requests behalve POST
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-
     try {
-        let paymentId;
-        const contentType = event.headers['content-type'];
-
-        if (contentType && contentType.includes('application/x-www-form-urlencoded')) {
-            const params = new URLSearchParams(event.body);
-            paymentId = params.get('id');
-        } else {
-            const body = JSON.parse(event.body);
-            paymentId = body.id;
-        }
+        const body = JSON.parse(event.body);
+        const paymentId = body.id;
 
         if (!paymentId) {
             return { statusCode: 400, body: 'Missing payment ID.' };
         }
-
-        const mollie = createMollieClient({ apiKey: process.env.MOLLIE_API_KEY }); // <-- Aangepast
+        
+        // Initialiseer Mollie client
+        const mollie = createMollieClient({ apiKey: process.env.MOLLIE_API_KEY });
         const molliePayment = await mollie.payments.get(paymentId);
         
-        if (molliePayment.isPaid()) {
-            const { giftId, payerEmail } = molliePayment.metadata;
+        // Initialiseer Supabase client
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+
+        if (molliePayment.status === 'paid') {
+            const giftId = molliePayment.metadata.gift_id;
             const paidAmount = parseFloat(molliePayment.amount.value);
-            
+
+            // Haal het huidige bedrag op
             const { data: gift, error: fetchError } = await supabase
                 .from('gifts')
                 .select('current_amount')
@@ -49,6 +44,7 @@ exports.handler = async (event, context) => {
             
             const newAmount = gift.current_amount + paidAmount;
             
+            // Update het bedrag in de database
             const { error: updateError } = await supabase
                 .from('gifts')
                 .update({ current_amount: newAmount })
@@ -58,16 +54,23 @@ exports.handler = async (event, context) => {
                 console.error('Fout bij het updaten van het bedrag:', updateError.message);
                 return { statusCode: 500, body: 'Database update mislukt.' };
             }
-
-            await supabase
+            
+            // Optioneel: Sla de betaling ook op in een aparte tabel
+            const { error: paymentError } = await supabase
                 .from('payments')
                 .insert([{
                     gift_id: giftId,
                     mollie_payment_id: paymentId,
                     amount: paidAmount,
                     status: 'paid',
-                    payer_email: payerEmail
+                    // Je kan ook de naam en e-mail opslaan uit de metadata
+                    payer_name: molliePayment.metadata.contributor_name,
+                    payer_email: molliePayment.metadata.contributor_email
                 }]);
+
+            if (paymentError) {
+                console.error('Fout bij het opslaan van de betaling:', paymentError);
+            }
             
             return { statusCode: 200, body: 'OK' };
         }
@@ -76,6 +79,6 @@ exports.handler = async (event, context) => {
 
     } catch (err) {
         console.error('Algemene fout in webhook:', err);
-        return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+        return { statusCode: 500, body: 'Interne serverfout.' };
     }
 };

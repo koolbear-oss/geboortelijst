@@ -116,23 +116,52 @@ function handleContributeClick(e) {
     }
 }
 
-// Verwerk het versturen van het betalingsformulier
-async function handlePaymentFormSubmit(e) {
-    e.preventDefault();
+// Functie om de betaling te initiëren via de Netlify Function (Mollie)
+async function handlePaymentFormSubmit(event) {
+    event.preventDefault();
     
     const giftId = document.getElementById('giftIdInput').value;
-    const amount = amountInput.value;
-    const name = document.getElementById('nameInput').value;
+    const amount = parseFloat(document.getElementById('amountInput').value);
+    const name = document.getElementById('nameInput').value || 'Anoniem';
     const email = document.getElementById('emailInput').value;
-    
-    // Verberg de modal terwijl de betaling wordt voorbereid
-    closePaymentModal();
-    
-    // Roep de betaalfunctie aan
-    initiatePayment(giftId, amount, name, email);
+
+    if (isNaN(amount) || amount <= 0) {
+        alert('Voer een geldig bedrag in.');
+        return;
+    }
+
+    try {
+        // Roep de Mollie-functie aan op je Netlify project
+        const response = await fetch('/.netlify/functions/create-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                giftId: giftId,
+                amount: amount,
+                name: name,
+                email: email
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Doorverwijzen naar de Mollie betaalpagina
+            window.location.href = data.checkoutUrl;
+        } else {
+            // Toon een foutmelding
+            alert(`Er is een fout opgetreden: ${data.error}`);
+            console.error('API Error:', data.error);
+        }
+
+    } catch (error) {
+        console.error('Fetch Error:', error);
+        alert('Er is een verbindingsfout opgetreden.');
+    }
 }
 
-// ===== BETAALFUNCTIES =====
 // ===== BETAALFUNCTIES =====
 async function initiatePayment(giftId, amount, name, email) {
     try {

@@ -1,6 +1,5 @@
-// netlify/functions/create-payment.js
+// .netlify/functions/create-payment.js
 
-// Importeer de Mollie client op de correcte manier
 const { createMollieClient } = require('@mollie/api-client');
 const { createClient } = require('@supabase/supabase-js');
 
@@ -10,21 +9,18 @@ exports.handler = async (event, context) => {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
-    // Parse de data uit de request body
-    const { id: giftId, amount, name, email } = JSON.parse(event.body);
-
-    // Valideer de verplichte velden (cadeau-ID en bedrag)
-    if (!giftId || !amount) {
-        return { statusCode: 400, body: 'Missing required fields (giftId or amount).' };
-    }
+    // Initialiseer Mollie client met de geheime API-sleutel
+    const mollieClient = createMollieClient({ apiKey: process.env.MOLLIE_API_KEY });
     
-    // Initialiseer Supabase client
+    // Initialiseer Supabase client met de service role key
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     try {
-        // Haal de cadeau-informatie op uit de Supabase database
+        const { giftId, amount, name, email } = JSON.parse(event.body);
+        
+        // Haal de cadeau-informatie op uit de database
         const { data: giftData, error: giftError } = await supabase
             .from('gifts')
             .select('*')
@@ -32,22 +28,19 @@ exports.handler = async (event, context) => {
             .single();
 
         if (giftError || !giftData) {
-            return { statusCode: 404, body: 'Gift not found.' };
+            return { statusCode: 404, body: 'Cadeau niet gevonden.' };
         }
 
-        // Initialiseer de Mollie client met de correcte aanroep
-        const mollieClient = createMollieClient({ apiKey: process.env.MOLLIE_API_KEY });
-        
         // Creëer de betaling bij Mollie
         const payment = await mollieClient.payments.create({
             amount: { value: parseFloat(amount).toFixed(2), currency: 'EUR' },
-            description: `Bijdrage aan: ${giftData.title}`,
-            redirectUrl: 'https://geboortelijst.netlify.app/?payment=success', // Hardcoded voor de zekerheid
-            webhookUrl: 'https://geboortelijst.netlify.app/.netlify/functions/payment-webhook', // Hardcoded voor de zekerheid
+            description: `Bijdrage voor: ${giftData.title}`,
+            redirectUrl: `${process.env.URL}/index.html?payment=success`, // De URL waar de gebruiker naartoe wordt gestuurd
+            webhookUrl: `${process.env.URL}/.netlify/functions/payment-webhook`, // De URL van je webhook functie
             metadata: { 
-                giftId: giftId, 
-                payerName: name || 'Anoniem',
-                payerEmail: email || ''
+                gift_id: giftId, 
+                contributor_name: name || 'Anoniem',
+                contributor_email: email
             }
         });
 
@@ -56,8 +49,12 @@ exports.handler = async (event, context) => {
             statusCode: 200,
             body: JSON.stringify({ checkoutUrl: payment.getCheckoutUrl() })
         };
+        
     } catch (err) {
-        console.error('Error in create-payment function:', err);
-        return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+        console.error('Fout bij het aanmaken van de betaling:', err);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: err.message || 'Interne serverfout.' })
+        };
     }
 };
