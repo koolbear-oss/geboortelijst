@@ -1,15 +1,11 @@
-// ===== SUPABASE API CONFIGURATIE =====
-// Maak verbinding met Supabase om de cadeau-data op te halen
+// ===== SUPABASE API CONFIGURATIE EN VARIABELEN =====
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-const SUPABASE_URL = 'https://wixtfldcnmfmpqvwyotv.supabase.co'; // Vervang met jouw Supabase URL
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpeHRmbGRjbm1mbXBxdnd5b3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNDA2NjQsImV4cCI6MjA3MTYxNjY2NH0.x34CuRhuR5j6-iRNne6LIWegZiCLxJXODm6WhlRplAI'; // Vervang met jouw anon key
+const SUPABASE_URL = 'https://wixtfldcnmfmpqvwyotv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpeHRmbGRjbm1mbXBxdnd5b3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNDA2NjQsImV4cCI6MjA3MTYxNjY2NH0.x34CuRhuR5j6-iRNne6LIWegZiCLxJXODm6WhlRplAI';
 
-// Initialiseer de Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-
-// ===== PAGINA INITIALISATIE EN DATA OPHALEN =====
 let allGifts = [];
 let paymentModal;
 let closeBtn;
@@ -20,7 +16,7 @@ async function fetchGifts() {
     console.log('Fetching gifts from Supabase...');
     const giftGrid = document.getElementById('giftGrid');
     if (!giftGrid) return;
-    giftGrid.innerHTML = ''; // Maak de grid eerst leeg
+    giftGrid.innerHTML = '';
 
     const { data: gifts, error } = await supabase
         .from('gifts')
@@ -44,7 +40,7 @@ async function fetchGifts() {
 function renderGifts(gifts) {
     const giftGrid = document.getElementById('giftGrid');
     if (!giftGrid) return;
-    giftGrid.innerHTML = ''; // Leeg de grid voordat we nieuwe items toevoegen
+    giftGrid.innerHTML = '';
 
     gifts.forEach(gift => {
         const percentage = gift.target_amount > 0 ? Math.min((gift.current_amount / gift.target_amount) * 100, 100).toFixed(0) : 0;
@@ -139,7 +135,6 @@ async function handlePaymentFormSubmit(event) {
         }
 
         const data = await response.json();
-        // Stuur de gebruiker door naar de Mollie checkout pagina
         window.location.href = data.checkoutUrl;
 
     } catch (error) {
@@ -148,44 +143,64 @@ async function handlePaymentFormSubmit(event) {
     }
 }
 
-async function handleReturnFromPayment() {
+// NIEUWE FUNCTIE: Handelt de initiële pagina-lading af
+async function handleInitialLoad() {
     const urlParams = new URLSearchParams(window.location.search);
     const paymentStatus = urlParams.get('payment');
-    const giftId = urlParams.get('giftId'); // Extra metadata toevoegen aan de redirect URL is handig
 
     if (paymentStatus === 'success') {
-        // Toon een tijdelijk succesbericht
         showTemporaryMessage('✅ Betaling succesvol, de lijst wordt bijgewerkt...');
-
-        // Wacht een moment om de webhook de tijd te geven
         await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // Haal de cadeaus opnieuw op om de UI bij te werken
         await fetchGifts();
-
-        // Verwijder de URL-parameter om te voorkomen dat de melding opnieuw verschijnt bij een refresh
-        const newUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
-        window.history.replaceState({ path: newUrl }, '', newUrl);
-
-        // Verwijder het tijdelijke bericht
+        history.replaceState(null, '', window.location.pathname);
         showTemporaryMessage('');
+    } else {
+        await fetchGifts();
+    }
+}
+
+// Functie om een toast/tijdelijk bericht te tonen
+function showTemporaryMessage(message) {
+    let toast = document.getElementById("toast-message");
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "toast-message";
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 1000;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 0;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        `;
+        document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    if (message) {
+        toast.style.opacity = '1';
+    } else {
+        toast.style.opacity = '0';
     }
 }
 
 // ===== INITIALISATIE =====
 document.addEventListener('DOMContentLoaded', () => {
-    // Referenties naar HTML-elementen na DOM-laden
+    // Initialiseer de modal en formulier variabelen
     paymentModal = document.getElementById('paymentModal');
     closeBtn = document.querySelector('#paymentModal .close-btn');
     paymentForm = document.getElementById('paymentForm');
 
-    // Laad de cadeaus van Supabase
-    fetchGifts();
+    // Roep de logica aan die de pagina op de juiste manier laadt
+    handleInitialLoad();
     
-    // Controleer of de gebruiker terugkomt van een succesvolle betaling
-    handleReturnFromPayment();
-
-    // Voeg event listeners toe aan de gift grid om clicks te delegeren
+    // Voeg event listener toe aan de gift grid om clicks te delegeren
     const giftGrid = document.getElementById('giftGrid');
     if (giftGrid) {
         giftGrid.addEventListener('click', handleContributeClick);
@@ -193,15 +208,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Voeg event listeners toe aan de modal
     if (closeBtn) closeBtn.addEventListener('click', closePaymentModal);
-    window.addEventListener('click', (e) => {
-        if (e.target === paymentModal) {
-            closePaymentModal();
-        }
-    });
+    if (paymentModal) {
+        window.addEventListener('click', (e) => {
+            if (e.target === paymentModal) {
+                closePaymentModal();
+            }
+        });
+    }
 
     // Voeg event listener toe aan het formulier
     if (paymentForm) paymentForm.addEventListener('submit', handlePaymentFormSubmit);
-
-    // Zoekbalk-functionaliteit inschakelen
+    
+    // Zoekbalk-functionaliteit
     setupSearch();
 });
