@@ -67,7 +67,6 @@ exports.handler = async (event, context) => {
                     mollie_payment_id: paymentId,
                     amount: paidAmount,
                     status: 'paid',
-                    payer_name: payerName,
                     payer_email: payerEmail
                 }]);
 
